@@ -1,0 +1,5 @@
+﻿C:\Users\Icy>sc.exe create "Morado.TG.NotABot" binpath= "D:\Server\TG\NotABot\NotABot.exe"
+
+
+powershell:
+New-Service -Name "Morado.TG.NotABot" -BinaryPathName "D:\Server\TG\NotABot\NotABot.exe"
