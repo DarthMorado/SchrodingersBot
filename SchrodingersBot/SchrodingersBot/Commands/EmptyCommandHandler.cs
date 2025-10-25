@@ -27,21 +27,30 @@ namespace SchrodingersBot.Commands
             StringBuilder sb = new StringBuilder();
             foreach (CoordinatesDTO coordinatesDTO in coordinates)
             {
-                sb.AppendLine(_coordinatesProcessingService.FormatCoordinatesString(coordinatesDTO));
+                sb.AppendLine(await _coordinatesProcessingService.FormatCoordinatesStringAsync(coordinatesDTO, request.Message.ChatId));
             }
 
-            return new()
-            { 
-                new()
+            var answerMessage = sb.ToString();
+
+            if (String.IsNullOrEmpty(answerMessage))
+            {
+                return null;
+            }
+            else
+            {
+                return new()
                 {
-                    AnswerType = "text",
-                    ChatId = message.ChatId,
-                    Text = sb.ToString(),
-                    IsHtml = true,
-                    DisableWebPagePreview = true,
-                    ReplyToMessageId = request.Message.MessageId
-                }
-            };
+                    new()
+                    {
+                        AnswerType = "text",
+                        ChatId = message.ChatId,
+                        Text = sb.ToString(),
+                        IsHtml = true,
+                        DisableWebPagePreview = true,
+                        ReplyToMessageId = request.Message.MessageId
+                    }
+                };
+            }
         }
     }
 }

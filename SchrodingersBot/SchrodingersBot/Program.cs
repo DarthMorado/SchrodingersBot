@@ -1,7 +1,9 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NotABot.Wrapper;
+using SchrodingersBot.DB.Repositories;
 using SchrodingersBot.Services.Location;
 using SchrodingersBot.Services.Text;
 
@@ -16,7 +18,7 @@ namespace SchrodingersBot
             .ConfigureAppConfiguration((context, config) =>
             {
                 var env = context.HostingEnvironment;
-
+                config.AddJsonFile($"appsettings.Setup.json", optional: true, reloadOnChange: true);
                 config.AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
             })
             .ConfigureServices((context, services) =>
@@ -44,6 +46,14 @@ namespace SchrodingersBot
             // Options
             services.Configure<GolfBotOptions>(config.GetSection("BotOptions"));
 
+            //MediatR
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+            ////services.AddScoped<MediatR.IMediator, MediatR.Mediator>();
+            ////services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(NotBotCommandHandler).Assembly));
+
+            // Database
+            ConfigureDatabase(services, config);
+
             //Main bot
             services.AddHostedService<GolfBot>();
 
@@ -51,15 +61,23 @@ namespace SchrodingersBot
             //services.AddSingleton<TodoOneMinuteDaemon>();
             //services.AddHostedService<BackgroundServiceStarter<TodoOneMinuteDaemon>>();
 
-            //MediatR
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
-            ////services.AddScoped<MediatR.IMediator, MediatR.Mediator>();
-            ////services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(NotBotCommandHandler).Assembly));
+            
             
             //Services
             services.AddScoped(typeof(ICoordinatesProcessingService), typeof(CoordinatesProcessingService));
             services.AddScoped(typeof(ITextProcessingService), typeof(TextProcessingService));
+            services.AddScoped(typeof(IAreasService), typeof(AreasService));
         }
 
+        public static void ConfigureDatabase(IServiceCollection services, IConfiguration config)
+        {
+            var connectionString = config.GetConnectionString("DefaultConnection");
+            services.AddDbContext<Database>(options =>
+                options.UseSqlServer(connectionString));
+            //services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped(typeof(IDbRepository<>), typeof(DbRepository<>));
+            
+
+        }
     }
 }

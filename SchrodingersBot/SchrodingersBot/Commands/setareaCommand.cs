@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SchrodingersBot.Commands
 {
-    public class setradiusCommand : BotCommand
+    public class setareaCommand : BotCommand
     {
     }
 }

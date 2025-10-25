@@ -2,6 +2,7 @@
 using SchrodingersBot.Services.Text;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -12,17 +13,35 @@ namespace SchrodingersBot.Services.Location
 {
     public interface ICoordinatesProcessingService
     {
-        string FormatCoordinatesString(CoordinatesDTO coordinatesDTO);
+        public Task<string> FormatCoordinatesStringAsync(CoordinatesDTO cords, long? chatId = null);
         public List<CoordinatesDTO> Search(string input);
+        public CoordinatesDTO? Convert(string lat, string lon);
     }
 
     public class CoordinatesProcessingService : ICoordinatesProcessingService
     {
         private readonly ITextProcessingService _textProcessingService;
+        private readonly IAreasService _areasService;
 
-        public CoordinatesProcessingService(ITextProcessingService textProcessingService)
+        public CoordinatesProcessingService(ITextProcessingService textProcessingService,
+            IAreasService areasService)
         {
             _textProcessingService = textProcessingService;
+            _areasService = areasService;
+        }
+
+        public CoordinatesDTO? Convert(string latStr, string lonStr)
+        {
+            try
+            {
+                var lat = double.Parse(_textProcessingService.ReplaceDecimalSepparator(latStr));
+                var lon = double.Parse(_textProcessingService.ReplaceDecimalSepparator(lonStr));
+                return new CoordinatesDTO(lat, lon);
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
 
         public List<CoordinatesDTO> Search(string input)
@@ -99,14 +118,34 @@ namespace SchrodingersBot.Services.Location
             return new CoordinatesDTO(lat, lon);
         }
 
-        public string FormatCoordinatesString(CoordinatesDTO cords)
+        public async Task<string> FormatCoordinatesStringAsync(CoordinatesDTO cords, long? chatId = null)
         {
             string wazeLink = $"<a href=\"https://www.waze.com/ul?ll={cords.Lat}%2C{cords.Lon}&navigate=yes\">Waze</a>";
             string googleLink = $"<a href=\"https://www.google.com/maps/dir/?api=1&destination={cords.Lat}%2C{cords.Lon}\">Google</a>";
 
+            IArea area = null;
+            if (chatId.HasValue)
+            {
+                area = await _areasService.GetArea(chatId.Value);
+            }
+            
+
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"{cords.Lat} {cords.Lon}");
             sb.AppendLine($"{wazeLink} {googleLink}");
+
+            if (area != null)
+            {
+                if (await area.InArea(cords))
+                {
+                    sb.AppendLine($"In area!");
+                }
+                else
+                {
+                    sb.AppendLine($"Not in area!");
+                }
+                
+            }
 
             return sb.ToString();
         }
