@@ -3,6 +3,7 @@ SchrodingersBot
 
 
 v.0.1 - cords & radius
+v.0.2 - where runs param + read version number
 v.1.0 - error handling
 
 v.1.1 - game info
