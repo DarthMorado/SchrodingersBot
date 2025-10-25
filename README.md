@@ -1,2 +1,10 @@
 # SchrodingersBot
 SchrodingersBot
+
+
+v.0.1 - cords & radius
+v.1.0 - error handling
+
+v.1.1 - game info
+v.1.2 - task info 
+v.1.3 - enter codes
