@@ -9,5 +9,6 @@ namespace SchrodingersBot
 {
     public class GolfBotOptions : BotOptions
     {
+        public string RunInfo { get; set; }
     }
 }

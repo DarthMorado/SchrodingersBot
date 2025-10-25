@@ -13,6 +13,7 @@ using System.Globalization;
 using System.Reflection.Metadata.Ecma335;
 using static System.Net.Mime.MediaTypeNames;
 using System.Text.Encodings.Web;
+using System.Runtime.CompilerServices;
 
 namespace NotABot.Wrapper
 {
@@ -61,6 +62,8 @@ namespace NotABot.Wrapper
                 var answers = (List<Answer>)a;
                 foreach (var answer in answers)
                 {
+                    PrepareAnswer(answer);
+
                     await _bot.SendMessage(chatId: update.Message.Chat.Id,
                         linkPreviewOptions: new LinkPreviewOptions() { IsDisabled = answer.DisableWebPagePreview },
                         parseMode: answer.IsHtml ? ParseMode.Html : ParseMode.MarkdownV2,
@@ -96,6 +99,42 @@ namespace NotABot.Wrapper
         public async Task ProcessError(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
             Console.WriteLine(exception);
+        }
+
+        private void PrepareAnswer(Answer input)
+        {
+            var specialSymbols = new List<string>()
+            {
+                "\\",
+                "_",
+                "*",
+                "[",
+                "]",
+                "(",
+                ")",
+                "~",
+                "`",
+                ">",
+                "<",
+                "&",
+                "#",
+                "+",
+                "-",
+                "=",
+                "|",
+                "{",
+                "}",
+                ".",
+                "!"
+            };
+
+            if (!input.IsHtml && !String.IsNullOrWhiteSpace(input.Text))
+            {
+                foreach (string specialSymbol in specialSymbols)
+                {
+                    input.Text = input.Text.Replace(specialSymbol, $"\\{specialSymbol}");
+                }
+            }
         }
     }
 }
