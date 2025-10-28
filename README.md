@@ -5,7 +5,7 @@ SchrodingersBot
 
 [x] v.0.1 - cords & radius  
 [x] v.0.2 - where runs param + read version number  
-[ ] v.0.3 - split command by space and underscore  
+[x] v.0.3 - split command by space and underscore  
 [ ] v.1.0 - error handling  
 [ ] v.1.1 - game info  
 [ ] v.1.2 - task info  
@@ -25,7 +25,7 @@ SchrodingersBot
 [ ] /follow - for coordinates format (take latest and add "X km (approx time) for user U")  
 
 # Known Problems:
--Links for google and waze are not formatted correctly
+
 
 # BackLog:
 [ ] /askai with reply to comment  
