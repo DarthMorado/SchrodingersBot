@@ -47,31 +47,38 @@ namespace NotABot.Wrapper
 
         public async Task ProcessUpdate(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-            IncomingMessage message = ProcessIncomingMessage(update);
-            if (String.IsNullOrWhiteSpace(message.CommandName)) return;
-            Type? type = Type.GetType(message.CommandName);
-            if (type is null) return;
-            if (!type.IsSubclassOf(typeof(BotCommand))) return;
-            object? command = Activator.CreateInstance(type);
-            if (command is null) return;
-            (command as BotCommand).Message = message;
-            object? a = await _mediator.Send(command);
-            if (a is null) return;
-            if (a is List<Answer>)
+            try
             {
-                var answers = (List<Answer>)a;
-                foreach (var answer in answers)
+                IncomingMessage message = ProcessIncomingMessage(update);
+                if (String.IsNullOrWhiteSpace(message.CommandName)) return;
+                Type? type = Type.GetType(message.CommandName);
+                if (type is null) return;
+                if (!type.IsSubclassOf(typeof(BotCommand))) return;
+                object? command = Activator.CreateInstance(type);
+                if (command is null) return;
+                (command as BotCommand).Message = message;
+                object? a = await _mediator.Send(command);
+                if (a is null) return;
+                if (a is List<Answer>)
                 {
-                    PrepareAnswer(answer);
+                    var answers = (List<Answer>)a;
+                    foreach (var answer in answers)
+                    {
+                        PrepareAnswer(answer);
 
-                    await _bot.SendMessage(chatId: update.Message.Chat.Id,
-                        linkPreviewOptions: new LinkPreviewOptions() { IsDisabled = answer.DisableWebPagePreview },
-                        parseMode: answer.IsHtml ? ParseMode.Html : ParseMode.MarkdownV2,
-                        text: answer.Text.ToString(CultureInfo.CreateSpecificCulture("en-GB")),
-                        replyParameters: answer.ReplyToMessageId.HasValue ? new ReplyParameters() { MessageId = answer.ReplyToMessageId.Value } : null,
-                        cancellationToken: new CancellationTokenSource(1000).Token
-                        );
+                        await _bot.SendMessage(chatId: update.Message.Chat.Id,
+                            linkPreviewOptions: new LinkPreviewOptions() { IsDisabled = answer.DisableWebPagePreview },
+                            parseMode: answer.IsHtml ? ParseMode.Html : ParseMode.MarkdownV2,
+                            text: answer.Text.ToString(CultureInfo.CreateSpecificCulture("en-GB")),
+                            replyParameters: answer.ReplyToMessageId.HasValue ? new ReplyParameters() { MessageId = answer.ReplyToMessageId.Value } : null,
+                            cancellationToken: new CancellationTokenSource(1000).Token
+                            );
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                //todo
             }
         }
 
