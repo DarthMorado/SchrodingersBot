@@ -11,7 +11,7 @@ namespace SchrodingersBot.Commands
     {
         public Task<List<Answer>> Handle(startgameCommand request, CancellationToken cancellationToken)
         {
-            
+            return null;
         }
     }
 }

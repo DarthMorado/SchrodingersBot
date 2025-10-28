@@ -36,6 +36,15 @@ namespace NotABot.Wrapper
                                 .ToList();
                     if (parts.Any())
                     {
+                        // Split command by underscore
+                        if (parts[0].Contains('_'))
+                        {
+                            var subParts = parts[0].Split('_').ToList();
+                            parts.RemoveAt(0);
+                            parts.InsertRange(0, subParts);
+                        }
+
+
                         Command = parts
                                     .First()
                                     .ToLower();
