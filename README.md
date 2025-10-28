@@ -5,6 +5,7 @@ SchrodingersBot
 
 [x] v.0.1 - cords & radius  
 [x] v.0.2 - where runs param + read version number  
+[ ] v.0.3 - split command by space and underscore  
 [ ] v.1.0 - error handling  
 [ ] v.1.1 - game info  
 [ ] v.1.2 - task info  
@@ -17,6 +18,7 @@ SchrodingersBot
 [ ] /help  
 [x] /setarea  
 [ ] /game  
+[ ] /joingame_onetimepassword
 [ ] /encxlogin  
 [ ] .code  
 [ ] /a /address - address2cords and cords2address  
