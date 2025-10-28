@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using NotABot.Wrapper;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,7 +17,7 @@ namespace SchrodingersBot
         public GolfBot(IMediator mediator, IOptions<GolfBotOptions> options)
             : base(mediator, options.Value)
         {
-
+            Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-GB");
         }
 
         public override IncomingMessage PrepareIncommingMessageCommandName(IncomingMessage incomingMessage)
