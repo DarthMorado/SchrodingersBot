@@ -9,6 +9,7 @@ using SchrodingersBot.Services.Text;
 using Microsoft.Extensions.Logging.EventLog;
 using Microsoft.Extensions.Logging;
 using SchrodingersBot.Services.Logging;
+using SchrodingersBot.Services.Encx;
 
 namespace SchrodingersBot
 {
@@ -61,6 +62,7 @@ namespace SchrodingersBot
         {
             // Options
             services.Configure<GolfBotOptions>(config.GetSection("BotOptions"));
+            services.AddAutoMapper(x => x.AddProfile(typeof(AutoMapperProfile)));
 
             //MediatR
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
@@ -83,6 +85,7 @@ namespace SchrodingersBot
             services.AddScoped(typeof(ICoordinatesProcessingService), typeof(CoordinatesProcessingService));
             services.AddScoped(typeof(ITextProcessingService), typeof(TextProcessingService));
             services.AddScoped(typeof(IAreasService), typeof(AreasService));
+            services.AddScoped<IEncxService, EncxService>();
         }
 
         public static void ConfigureDatabase(IServiceCollection services, IConfiguration config)

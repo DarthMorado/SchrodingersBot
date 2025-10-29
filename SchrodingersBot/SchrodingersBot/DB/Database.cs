@@ -18,5 +18,7 @@ namespace SchrodingersBot
         }
 
         public DbSet<AreaEntity> Areas { get; set; }
+        public DbSet<EncxLoginInfoEntity> LoginInfos { get; set; }
+        
     }
 }
