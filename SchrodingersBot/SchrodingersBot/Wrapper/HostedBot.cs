@@ -34,6 +34,7 @@ namespace NotABot.Wrapper
         }
 
         public abstract IncomingMessage PrepareIncommingMessageCommandName(IncomingMessage input);
+        public abstract Task ProcessUnexpectedErrorAsync(Exception ex);
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
@@ -49,7 +50,7 @@ namespace NotABot.Wrapper
         {
             try
             {
-                IncomingMessage message = ProcessIncomingMessage(update);
+                IncomingMessage message = await ProcessIncomingMessage(update);
                 if (String.IsNullOrWhiteSpace(message.CommandName)) return;
                 Type? type = Type.GetType(message.CommandName);
                 if (type is null) return;
@@ -78,28 +79,36 @@ namespace NotABot.Wrapper
             }
             catch (Exception ex)
             {
-                //todo
+                await ProcessUnexpectedErrorAsync(ex);
             }
         }
 
-        public IncomingMessage ProcessIncomingMessage(Update update)
+        public async Task<IncomingMessage> ProcessIncomingMessage(Update update)
         {
             IncomingMessage incomingMessage = new IncomingMessage()
             {
                 UpdateType = update.Type.ToString().ToLower()
             };
 
-            switch (update.Type)
-            { 
-                case UpdateType.Message:
-                    var message = update.Message;
-                    incomingMessage.Text = message.Text;
-                    incomingMessage.ChatId = message.Chat.Id;
-                    incomingMessage.MessageId = message.MessageId;
-                    break;
+            try
+            {
+                switch (update.Type)
+                {
+                    case UpdateType.Message:
+                        var message = update.Message;
+                        incomingMessage.Text = message.Text;
+                        incomingMessage.ChatId = message.Chat.Id;
+                        incomingMessage.MessageId = message.MessageId;
+                        break;
+                }
+
+                incomingMessage = PrepareIncommingMessageCommandName(incomingMessage);
+            }
+            catch(Exception ex)
+            {
+                await ProcessUnexpectedErrorAsync(ex);
             }
 
-            incomingMessage = PrepareIncommingMessageCommandName(incomingMessage);
             return incomingMessage;
         }
 

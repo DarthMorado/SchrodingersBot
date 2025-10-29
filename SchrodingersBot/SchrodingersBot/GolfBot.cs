@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NotABot.Wrapper;
 using System;
@@ -12,9 +13,11 @@ namespace SchrodingersBot
 {
     public class GolfBot : HostedBot<GolfBotOptions>
     {
+        private readonly ILogger<GolfBot> _logger;
+
         private string BotCommandNamespace = "SchrodingersBot.Commands.";
 
-        public GolfBot(IMediator mediator, IOptions<GolfBotOptions> options)
+        public GolfBot(IMediator mediator, IOptions<GolfBotOptions> options, ILogger<GolfBot> logger)
             : base(mediator, options.Value)
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-GB");
@@ -52,6 +55,11 @@ namespace SchrodingersBot
 
             incomingMessage.CommandName = $"{BotCommandNamespace}{incomingMessage.CommandName}";
             return incomingMessage;
+        }
+
+        public override async Task ProcessUnexpectedErrorAsync(Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error!");
         }
     }
 }

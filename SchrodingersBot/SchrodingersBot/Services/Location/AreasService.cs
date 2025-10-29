@@ -55,7 +55,17 @@ namespace SchrodingersBot.Services.Location
         public async Task SetArea(long chatId, RadiusDTO? radius, PolygonDTO? polygon)
         {
             AreaEntity area;
-            var areas = await _areaRepository.FindAsync(x => x.ChatId == chatId);
+            var areas = (await _areaRepository.FindAsync(x => x.ChatId == chatId)).ToList();
+            if (radius is null && polygon is null && areas.Any())
+            {
+                for(int i = areas.Count() - 1; i >= 0; i--)
+                {
+                    area = areas[i];
+                    await _areaRepository.DeleteAsync(area);
+                }
+                return;
+            }
+
             if (areas == null || !areas.Any())
             {
                 area = new AreaEntity()

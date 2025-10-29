@@ -20,6 +20,7 @@ namespace NotABot.Wrapper
         public abstract Task<List<Answer>> Action();
         public abstract Task Subscribe(long chatId, Dictionary<string, object> options);
         public abstract Task UnSubscribe(long chatId, Dictionary<string, object> options);
+        public abstract Task ProcessUnexpectedError(Exception ex);
 
         protected BotDaemon()
         {
@@ -40,8 +41,15 @@ namespace NotABot.Wrapper
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                await Action();
-                await Task.Delay(Interval);
+                try
+                {
+                    await Action();
+                    await Task.Delay(Interval);
+                }
+                catch(Exception ex)
+                {
+                    await ProcessUnexpectedError(ex);
+                }
             }
         }
 

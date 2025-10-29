@@ -6,6 +6,9 @@ using NotABot.Wrapper;
 using SchrodingersBot.DB.Repositories;
 using SchrodingersBot.Services.Location;
 using SchrodingersBot.Services.Text;
+using Microsoft.Extensions.Logging.EventLog;
+using Microsoft.Extensions.Logging;
+using SchrodingersBot.Services.Logging;
 
 namespace SchrodingersBot
 {
@@ -24,6 +27,19 @@ namespace SchrodingersBot
             .ConfigureServices((context, services) =>
             {
                 Configure(services, context.Configuration);
+            })
+            .ConfigureLogging(log =>
+            {
+                log.ClearProviders();
+                log.AddConsole();
+
+                log.AddEventLog(new EventLogSettings
+                {
+                    SourceName = "Morado.TG",
+                    LogName = "SchrodingersBot"
+                });
+
+                log.AddProvider(new BotLoggerProvider());
             });
 
 

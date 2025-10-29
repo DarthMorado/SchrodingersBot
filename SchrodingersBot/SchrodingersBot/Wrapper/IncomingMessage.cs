@@ -14,7 +14,7 @@ namespace NotABot.Wrapper
         public string Parameter { get; set; }
         public List<string> Parameters { get; set; }
         private string _text;
-        public string Text 
+        public string Text
         {
             get
             {
@@ -28,6 +28,7 @@ namespace NotABot.Wrapper
                     return;
                 }
                 _text = value.Trim();
+
                 if (!String.IsNullOrEmpty(_text) && _text.StartsWith("/"))
                 {
                     var parts = _text
@@ -57,7 +58,6 @@ namespace NotABot.Wrapper
                         }
                     }
                 }
-
             }
         }
         public long ChatId { get; internal set; }
