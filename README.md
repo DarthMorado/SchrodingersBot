@@ -9,7 +9,7 @@ SchrodingersBot
 [x] v.1.0 - error handling  
 [ ] v.1.1 - game info  
 [ ] v.1.2 - task info  
-[ ] v.1.3 - enter codes  
+[ ] v.1.3 - enter codes  + add prefix
 [ ] v.1.4 - follow users
 [ ] v.1.5 - Latvian addresses / KML / OSM  / grauzti
 
