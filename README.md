@@ -18,7 +18,9 @@ SchrodingersBot
 [x] /start  
 [ ] /help  
 [x] /setarea  
+[ ] /startgame   
 [ ] /game  
+[ ] /stopgame
 [ ] /joingame_onetimepassword
 [ ] /encxlogin  
 [ ] .code  
@@ -31,3 +33,4 @@ SchrodingersBot
 # BackLog:
 [ ] /askai with reply to comment  
 [ ] write logs to TG chat from config
+[ ] IEnumerable + yield
