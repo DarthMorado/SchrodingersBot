@@ -25,6 +25,7 @@ SchrodingersBot
 [ ] /encxlogin  
 [ ] .code  
 [ ] /a /address - address2cords and cords2address  
+[ ] getscreenshot
 [ ] /follow - for coordinates format (take latest and add "X km (approx time) for user U")  
 
 # Known Problems:
