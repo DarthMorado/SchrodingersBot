@@ -22,7 +22,7 @@ namespace SchrodingersBot.Commands
             _areasService = areasService;
         }
 
-        public async Task<List<Answer>> Handle(setareaCommand request, CancellationToken cancellationToken)
+        public async Task<Result> Handle(setareaCommand request, CancellationToken cancellationToken)
         {
             if (request?.Message?.Parameters == null)
             {

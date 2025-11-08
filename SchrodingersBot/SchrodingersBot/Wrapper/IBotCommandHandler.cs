@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace NotABot.Wrapper
 {
-    public interface IBotCommandHandler<T> : IRequestHandler<T, List<Answer>>
+    public interface IBotCommandHandler<T> : IRequestHandler<T, Result>
         where T : BotCommand
     {
         

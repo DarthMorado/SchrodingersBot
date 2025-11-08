@@ -12,13 +12,16 @@ namespace SchrodingersBot
     public class Database : DbContext
     {
         public Database(DbContextOptions<Database> options)
-            :base(options)
+            : base(options)
         {
-            
+
         }
 
         public DbSet<AreaEntity> Areas { get; set; }
         public DbSet<EncxLoginInfoEntity> LoginInfos { get; set; }
-        
+        public DbSet<EncxGameSubscriptionEntity> GameSubscriptions {get;set;}
+        public DbSet<EncxLevelEntity> Levels { get; set; }
+        public DbSet<EncxObjectEntity> Objects { get; set; }
+
     }
 }

@@ -11,7 +11,7 @@ namespace SchrodingersBot.DTO.Encx
         public int SectorId { get; set; }//ID сектора
         public int Order { get; set; }//пп
         public string Name { get; set; }//Название сектора
-        public string Answer { get; set; }//Отгаданный ответ
+        public EncxAnswer Answer { get; set; }//Отгаданный ответ
         public bool? IsAnswered { get; set; }//отгадан / не отгадан
     }
 }

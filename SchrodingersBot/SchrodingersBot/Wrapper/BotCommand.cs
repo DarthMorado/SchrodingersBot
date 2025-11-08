@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace NotABot.Wrapper
 {
-    public class BotCommand : IRequest<List<Answer>>
+    public class BotCommand : IRequest<Result>
     {
         public IncomingMessage Message { get; set; }
     }

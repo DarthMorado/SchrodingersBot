@@ -17,7 +17,7 @@ namespace SchrodingersBot.Commands
             _coordinatesProcessingService = coordinatesProcessingService;
         }
 
-        public async Task<List<Answer>> Handle(emptyCommand request, CancellationToken cancellationToken)
+        public async Task<Result> Handle(emptyCommand request, CancellationToken cancellationToken)
         {
             var message = request.Message;
 
@@ -38,18 +38,7 @@ namespace SchrodingersBot.Commands
             }
             else
             {
-                return new()
-                {
-                    new()
-                    {
-                        AnswerType = "text",
-                        ChatId = message.ChatId,
-                        Text = sb.ToString(),
-                        IsHtml = true,
-                        DisableWebPagePreview = true,
-                        ReplyToMessageId = request.Message.MessageId
-                    }
-                };
+                return Result.SimpleText(request.Message, sb.ToString(), true, true);
             }
         }
     }

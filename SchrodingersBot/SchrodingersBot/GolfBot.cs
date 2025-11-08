@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NotABot.Wrapper;
+using SchrodingersBot.Commands;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -40,7 +41,8 @@ namespace SchrodingersBot
                     }
                     if (text.StartsWith("."))
                     {
-                        incomingMessage.CommandName = $"DotCommand";
+                        incomingMessage.CommandName = nameof(entercodeCommand);
+                        incomingMessage.Parameter = text[1..];
                     }
                     else if (!String.IsNullOrEmpty(incomingMessage.Command))
                     {

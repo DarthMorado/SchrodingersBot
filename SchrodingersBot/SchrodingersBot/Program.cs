@@ -86,6 +86,7 @@ namespace SchrodingersBot
             services.AddScoped(typeof(ITextProcessingService), typeof(TextProcessingService));
             services.AddScoped(typeof(IAreasService), typeof(AreasService));
             services.AddScoped<IEncxService, EncxService>();
+            services.AddScoped<IGameService, GameService>();
         }
 
         public static void ConfigureDatabase(IServiceCollection services, IConfiguration config)

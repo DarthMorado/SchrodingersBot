@@ -67,13 +67,29 @@ namespace NotABot.Wrapper
                     {
                         PrepareAnswer(answer);
 
-                        await _bot.SendMessage(chatId: update.Message.Chat.Id,
-                            linkPreviewOptions: new LinkPreviewOptions() { IsDisabled = answer.DisableWebPagePreview },
-                            parseMode: answer.IsHtml ? ParseMode.Html : ParseMode.MarkdownV2,
-                            text: answer.Text.ToString(CultureInfo.CreateSpecificCulture("en-GB")),
-                            replyParameters: answer.ReplyToMessageId.HasValue ? new ReplyParameters() { MessageId = answer.ReplyToMessageId.Value } : null,
-                            cancellationToken: new CancellationTokenSource(1000).Token
-                            );
+                        if (answer.AnswerType == Answer.AnswerTypes.Text)
+                        {
+                            await _bot.SendMessage(chatId: update.Message.Chat.Id,
+                                linkPreviewOptions: new LinkPreviewOptions() { IsDisabled = answer.DisableWebPagePreview },
+                                parseMode: answer.IsHtml ? ParseMode.Html : ParseMode.MarkdownV2,
+                                text: answer.Text.ToString(CultureInfo.CreateSpecificCulture("en-GB")),
+                                replyParameters: answer.ReplyToMessageId.HasValue ? new ReplyParameters() { MessageId = answer.ReplyToMessageId.Value } : null,
+                                cancellationToken: new CancellationTokenSource(1000).Token
+                                );
+                        }
+                        if (answer.AnswerType == Answer.AnswerTypes.Reaction)
+                        {
+                            await _bot.SetMessageReaction(chatId: update.Message.Chat.Id,
+                                messageId: answer.ReplyToMessageId.Value,
+                                reaction: new List<ReactionTypeEmoji>()
+                                {
+                                    new ()
+                                    {
+                                        Emoji = answer.Text
+                                    }
+                                }
+                                );
+                        }
                     }
                 }
             }

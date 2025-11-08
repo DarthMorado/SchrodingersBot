@@ -9,7 +9,7 @@ namespace SchrodingersBot.Commands
 {
     public class TestCommandHandler : IBotCommandHandler<testCommand>
     {
-        public async Task<List<Answer>> Handle(testCommand request, CancellationToken cancellationToken)
+        public async Task<Result> Handle(testCommand request, CancellationToken cancellationToken)
         {
             return null;
         }

@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
+using static NotABot.Wrapper.Answer;
 
 namespace SchrodingersBot.Commands
 {
@@ -20,7 +21,7 @@ namespace SchrodingersBot.Commands
             _options = options.Value;
         }
 
-        public async Task<List<Answer>> Handle(startCommand request, CancellationToken cancellationToken)
+        public async Task<Result> Handle(startCommand request, CancellationToken cancellationToken)
         {
             var sb = new StringBuilder();
             sb.AppendLine("This is Bot");
@@ -39,7 +40,7 @@ namespace SchrodingersBot.Commands
                 new()
                 {
                     ChatId = request.Message.ChatId,
-                    AnswerType = "message",
+                    AnswerType = AnswerTypes.Text,
                     Text = sb.ToString()
                 }
             };

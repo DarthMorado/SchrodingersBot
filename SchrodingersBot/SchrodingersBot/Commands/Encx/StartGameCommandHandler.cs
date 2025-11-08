@@ -1,4 +1,6 @@
 ﻿using NotABot.Wrapper;
+using SchrodingersBot.DB.DBO;
+using SchrodingersBot.DB.Repositories;
 using SchrodingersBot.DTO.EnGame;
 using SchrodingersBot.Services.Encx;
 using System;
@@ -6,19 +8,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Telegram.Bot.Types;
+using static NotABot.Wrapper.Answer;
 
 namespace SchrodingersBot.Commands
 {
     public class StartGameCommandHandler : IBotCommandHandler<startgameCommand>
     {
         private readonly IEncxService _encxService;
+        private readonly IDbRepository<EncxGameSubscriptionEntity> _gameSubscriptionsRepository;
 
-        public StartGameCommandHandler(IEncxService encxService)
+        public StartGameCommandHandler(IEncxService encxService,
+            IDbRepository<EncxGameSubscriptionEntity> gameSubscriptionsRepository)
         {
             _encxService = encxService;
+            _gameSubscriptionsRepository = gameSubscriptionsRepository;
         }
 
-        public async Task<List<Answer>> Handle(startgameCommand request, CancellationToken cancellationToken)
+        public async Task<Result> Handle(startgameCommand request, CancellationToken cancellationToken)
         {
             if (request?.Message?.Parameters is null)
             {
@@ -75,13 +82,25 @@ namespace SchrodingersBot.Commands
 
             var gameInfo = await _encxService.GetGameAsync(request.Message.ChatId, url, loginInfo);
 
-            return new List<Answer>()
+            var gameSubEntity = new EncxGameSubscriptionEntity()
+            {
+                ChatId = request.Message.ChatId,
+                Domain = domain,
+                GameId = gameId,
+                LoginInfoId = loginInfo.Id,
+                IsActive = true,
+            };
+
+            await _gameSubscriptionsRepository.CreateAsync(gameSubEntity);
+
+
+            return new Result()
             {
                 new()
                 {
                     ChatId = request.Message.ChatId,
                     Text = (gameInfo is null) ? "Something went wrong" : $"{gameInfo.GameId}",
-                    AnswerType = "message",
+                    AnswerType = AnswerTypes.Text,
                     IsHtml = false
                 }
             };
