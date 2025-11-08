@@ -14,6 +14,8 @@ namespace SchrodingersBot.DB.DBO
         public int? LoginInfoId { get; set; }
         public string Domain { get; set; }
         public string GameId { get; set; }
+        public int ActiveLevelId { get; set; } = 0;
+        public int ActiveLevelNumber { get; set; } = 0;
         public bool IsActive { get; set; } = false;
 
         public IEnumerable<EncxLevelEntity> Levels { get; set; }

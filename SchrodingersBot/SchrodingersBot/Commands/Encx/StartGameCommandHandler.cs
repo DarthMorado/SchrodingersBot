@@ -89,6 +89,8 @@ namespace SchrodingersBot.Commands
                 GameId = gameId,
                 LoginInfoId = loginInfo.Id,
                 IsActive = true,
+                ActiveLevelId = gameInfo?.Level?.LevelId ?? 0,
+                ActiveLevelNumber = gameInfo?.Level?.Number ?? 0,
             };
 
             await _gameSubscriptionsRepository.CreateAsync(gameSubEntity);

@@ -17,6 +17,7 @@ namespace NotABot.Wrapper
         public bool IsHtml { get; internal set; }
         public bool DisableWebPagePreview { get; internal set; }
         public int? ReplyToMessageId { get; set; }
+        public byte[] Content { get; set; }
 
         public enum AnswerTypes
         {
@@ -77,6 +78,17 @@ namespace NotABot.Wrapper
                     ReplyToMessageId = isReply ? message.MessageId : null
             }
             ;
+        }
+
+        public static Answer SimpleImage(IncomingMessage message, byte[] content, string title = "")
+        {
+            return new Answer()
+            {
+                ChatId = message.ChatId,
+                AnswerType = AnswerTypes.Image,
+                Content = content,
+                Text = title
+            };
         }
     }
 }

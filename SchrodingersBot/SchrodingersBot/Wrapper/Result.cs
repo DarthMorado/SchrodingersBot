@@ -31,5 +31,13 @@ namespace NotABot.Wrapper
                 Answer.Reaction(message, reactionType)
             };
         }
+
+        public static Result SimpleImage(IncomingMessage message, byte[] content, string title = "")
+        {
+            return new Result()
+            {
+                Answer.SimpleImage(message, content, title)
+            };
+        }
     }
 }

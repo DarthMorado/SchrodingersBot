@@ -90,6 +90,11 @@ namespace NotABot.Wrapper
                                 }
                                 );
                         }
+                        if (answer.AnswerType == Answer.AnswerTypes.Image)
+                        {
+                            using var ms = new MemoryStream(answer.Content);
+                            await _bot.SendPhoto(chatId: update.Message.Chat.Id, new InputFileStream(ms, answer.Text));
+                        }
                     }
                 }
             }

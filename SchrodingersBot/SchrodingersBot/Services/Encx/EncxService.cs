@@ -16,6 +16,9 @@ namespace SchrodingersBot.Services.Encx
 {
     public interface IEncxService
     {
+        public static string LoginUrl(string domain) => $"https://{domain}/login/signin?json=1";
+        public static string GameUrl(string domain, string gameId) => $"https://{domain}/GameEngines/Encounter/Play/{gameId}?json=1";
+
         public Task<LoginInfoDTO> GetLoginInfo(long chatId, string domain, string username = null, string password = null);
         public Task<EncxGameEngineModel> GetGameAsync(long chatId, string url, LoginInfoDTO loginInfo);
         public Task<EncxGameEngineModel> GetGameAsync(long chatId, string domain, string gameId, LoginInfoDTO loginInfo);
@@ -27,9 +30,8 @@ namespace SchrodingersBot.Services.Encx
         private readonly IDbRepository<EncxLoginInfoEntity> _loginInfoRepository;
         private readonly IMapper _mapper;
 
-        private static string LoginUrl(string domain) => $"https://{domain}/login/signin?json=1";
-        private static string GameUrl(string domain, string gameId) => $"https://{domain}/GameEngines/Encounter/Play/{gameId}?json=1";
-
+        public static string LoginUrl(string domain) => $"https://{domain}/login/signin?json=1";
+        public static string GameUrl(string domain, string gameId) => $"https://{domain}/GameEngines/Encounter/Play/{gameId}?json=1";
 
         public EncxService(IDbRepository<EncxLoginInfoEntity> loginInfoRepository,
             IMapper mapper)
