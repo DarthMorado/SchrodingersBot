@@ -37,7 +37,7 @@ namespace SchrodingersBot.DB.Repositories
 
         public virtual async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
         {
-            return await _dbSet.Where(predicate).ToListAsync();
+            return await _dbSet.Where(predicate).AsNoTracking().ToListAsync();
         }
 
         public virtual async Task<T> CreateAsync(T entity)

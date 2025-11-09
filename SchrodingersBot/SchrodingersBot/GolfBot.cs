@@ -22,6 +22,7 @@ namespace SchrodingersBot
             : base(mediator, options.Value)
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-GB");
+            _logger = logger;
         }
 
         public override IncomingMessage PrepareIncommingMessageCommandName(IncomingMessage incomingMessage)

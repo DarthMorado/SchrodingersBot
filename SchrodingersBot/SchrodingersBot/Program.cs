@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging.EventLog;
 using Microsoft.Extensions.Logging;
 using SchrodingersBot.Services.Logging;
 using SchrodingersBot.Services.Encx;
+using SchrodingersBot.Daemons;
 
 namespace SchrodingersBot
 {
@@ -74,13 +75,14 @@ namespace SchrodingersBot
 
             //Main bot
             services.AddHostedService<GolfBot>();
+            
 
             //Daemons
-            //services.AddSingleton<TodoOneMinuteDaemon>();
-            //services.AddHostedService<BackgroundServiceStarter<TodoOneMinuteDaemon>>();
+            //services.AddSingleton<EncxGameUpdateDaemon>();
+            //services.AddHostedService<BackgroundServiceStarter<EncxGameUpdateDaemon>>();
 
-            
-            
+
+
             //Services
             services.AddScoped(typeof(ICoordinatesProcessingService), typeof(CoordinatesProcessingService));
             services.AddScoped(typeof(ITextProcessingService), typeof(TextProcessingService));

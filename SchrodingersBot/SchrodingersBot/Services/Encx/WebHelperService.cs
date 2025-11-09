@@ -42,7 +42,10 @@ namespace SchrodingersBot.Services.Encx
             // Go to default page
             await page.GoToAsync(BaseUrl); // Need this!
 
-            await page.GoToAsync(url);
+            await page.GoToAsync(url, new NavigationOptions
+            {
+                WaitUntil = new[] { WaitUntilNavigation.Load }
+            });
 
             var content = await page.GetContentAsync();
 
@@ -54,12 +57,23 @@ namespace SchrodingersBot.Services.Encx
 
                 //todo - check if need to set up cookies again
 
-                await page.GoToAsync(url);
+                await page.GoToAsync(url, new NavigationOptions
+                {
+                    WaitUntil = new[] { WaitUntilNavigation.Load }
+                });
             }
 
             var filename = $"c:/temp/test.png";
 
-            using Stream stream = await page.ScreenshotStreamAsync();
+            var screenshotOptions = new ScreenshotOptions
+            {
+                FullPage = true,
+                CaptureBeyondViewport = true,
+                OptimizeForSpeed = true,
+                Type = ScreenshotType.Png
+            };
+
+            using Stream stream = await page.ScreenshotStreamAsync(screenshotOptions);
             using MemoryStream ms = new MemoryStream();
             stream.CopyTo(ms);
             return ms.ToArray();
