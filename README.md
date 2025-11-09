@@ -9,23 +9,23 @@ SchrodingersBot
 [x] v.1.0 - error handling  
 [ ] v.1.1 - game info  
 [ ] v.1.2 - task info  
-[ ] v.1.3 - enter codes  + add prefix
-[ ] v.1.4 - follow users
-[ ] v.1.5 - Latvian addresses / KML / OSM  / grauzti
+[ ] v.1.3 - enter codes  + add prefix   
+[ ] v.1.4 - follow users   
+[ ] v.1.5 - addresses / KML / OSM  / grauzti   
 
 # Commands:
 [x] without command - search for coordinates (correct links to google/waze/baltic)  
 [x] /start  
 [ ] /help  
 [x] /setarea  
-[ ] /startgame   
-[ ] /game  
-[ ] /stopgame   
+[x] /startgame   
+[x] /game  
+[x] /stopgame   
 [ ] /joingame_onetimepassword   
 [ ] /encxlogin  
-[ ] .code  
+[x] .code  
 [ ] /a - address2cords and cords2address  
-[ ] /getscreenshot   
+[x] /screenshot   
 [ ] /follow - for coordinates format (take latest and add "X km (approx time) for user U")     
 
 # Known Problems:
