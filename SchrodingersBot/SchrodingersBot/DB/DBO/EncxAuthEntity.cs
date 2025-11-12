@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SchrodingersBot.DB.DBO
 {
-    public class EncxLoginInfoEntity : BaseEntity
+    public class EncxAuthEntity : BaseEntity
     {
         public long ChatId { get; set; }
         public string Username { get; set; }
@@ -14,5 +14,10 @@ namespace SchrodingersBot.DB.DBO
         public string Atoken { get; set; }
         public string Stoken { get; set; }
         public string Guid { get; set; }
+        public string Domain { get; set; }
+        public string GameId { get; set; }
+        public string? BrowserCookiesJson { get; set; }
+
+        public List<EncxGameSubscriptionEntity> Subscriptions { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SchrodingersBot;
 
@@ -11,9 +12,11 @@ using SchrodingersBot;
 namespace SchrodingersBot.Migrations
 {
     [DbContext(typeof(Database))]
-    partial class DatabaseModelSnapshot : ModelSnapshot
+    [Migration("20251111224419_v.1.2.0.2")]
+    partial class v1202
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -198,7 +201,7 @@ namespace SchrodingersBot.Migrations
             modelBuilder.Entity("SchrodingersBot.DB.DBO.EncxGameSubscriptionEntity", b =>
                 {
                     b.HasOne("SchrodingersBot.DB.DBO.EncxAuthEntity", "LoginInfo")
-                        .WithMany("Subscriptions")
+                        .WithMany()
                         .HasForeignKey("LoginInfoId");
 
                     b.Navigation("LoginInfo");
@@ -222,11 +225,6 @@ namespace SchrodingersBot.Migrations
                         .IsRequired();
 
                     b.Navigation("Level");
-                });
-
-            modelBuilder.Entity("SchrodingersBot.DB.DBO.EncxAuthEntity", b =>
-                {
-                    b.Navigation("Subscriptions");
                 });
 
             modelBuilder.Entity("SchrodingersBot.DB.DBO.EncxGameSubscriptionEntity", b =>

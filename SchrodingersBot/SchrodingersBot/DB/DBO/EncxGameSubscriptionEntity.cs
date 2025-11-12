@@ -10,7 +10,7 @@ namespace SchrodingersBot.DB.DBO
     public class EncxGameSubscriptionEntity : BaseEntity
     {
         public long ChatId { get; set; }
-        public EncxLoginInfoEntity LoginInfo { get; set; }
+        public EncxAuthEntity LoginInfo { get; set; }
         public int? LoginInfoId { get; set; }
         public string Domain { get; set; }
         public string GameId { get; set; }

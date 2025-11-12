@@ -62,16 +62,16 @@ namespace SchrodingersBot.Commands
                     return null;
                 case 1:
                     // Start game without login
-                    loginInfo = await _encxService.GetLoginInfo(request.Message.ChatId, domain);
+                    loginInfo = await _encxService.GetLoginInfo(request.Message.ChatId, domain, gameId);
                     //todo
                     break;
                 case 2:
                     // Start game with known user
-                    loginInfo = await _encxService.GetLoginInfo(request.Message.ChatId, domain, request.Message.Parameters[1]);
+                    loginInfo = await _encxService.GetLoginInfo(request.Message.ChatId, domain, gameId, request.Message.Parameters[1]);
                     break;
                 case 3:
                     // Start game with user/pass
-                    loginInfo = await _encxService.GetLoginInfo(request.Message.ChatId, domain, request.Message.Parameters[1], request.Message.Parameters[2]);
+                    loginInfo = await _encxService.GetLoginInfo(request.Message.ChatId, domain, gameId, request.Message.Parameters[1], request.Message.Parameters[2]);
                     break;
             }
 

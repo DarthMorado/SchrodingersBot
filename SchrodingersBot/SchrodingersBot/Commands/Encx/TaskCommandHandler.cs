@@ -17,15 +17,18 @@ namespace SchrodingersBot.Commands
     public class TaskCommandHandler : IBotCommandHandler<taskCommand>
     {
         private readonly IDbRepository<EncxGameSubscriptionEntity> _gameSubscriptionRepository;
-        private readonly IDbRepository<EncxLoginInfoEntity> _loginInfoRepository;
+        private readonly IDbRepository<EncxAuthEntity> _loginInfoRepository;
         private readonly IEncxService _encxService;
+        private readonly IEncxEngine _engine;
         private readonly IMapper _mapper;
 
         public TaskCommandHandler(IDbRepository<EncxGameSubscriptionEntity> gameSubscriptionRepository,
-            IDbRepository<EncxLoginInfoEntity> loginInfoRepository,
+            IDbRepository<EncxAuthEntity> loginInfoRepository,
             IEncxService encxService,
+            IEncxEngine engine,
             IMapper mapper)
         {
+            _engine = engine;
             _gameSubscriptionRepository = gameSubscriptionRepository;
             _loginInfoRepository = loginInfoRepository;
             _encxService = encxService;
@@ -50,7 +53,14 @@ namespace SchrodingersBot.Commands
             var loginInfoEntity = await _loginInfoRepository.GetByIdAsync(activeGame.LoginInfoId.Value);
             var loginInfo = _mapper.Map<LoginInfoDTO>(loginInfoEntity);
 
-            var game = await _encxService.GetGameAsync(request.Message.ChatId, activeGame.Domain, activeGame.GameId, loginInfo);
+
+            loginInfoEntity.Domain = activeGame.Domain;
+            loginInfoEntity.GameId = activeGame.GameId;
+
+            //var game = await _encxService.GetGameAsync(request.Message.ChatId, activeGame.Domain, activeGame.GameId, loginInfo);
+
+            var game = await _engine.GetGameObject(loginInfoEntity);
+
             var lvl = game.Level;
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"Уровень {lvl.Number}/{game.Levels.Count} {lvl.Name}");
@@ -79,14 +89,21 @@ namespace SchrodingersBot.Commands
             result.Add(Answer.SimpleText(request.Message, sb.ToString()));
             
             sb = new StringBuilder();
-            if (lvl.Task != null)
+            if (lvl.Task != null || lvl.Tasks != null)
             {
                 sb.AppendLine($"Задание:");
-                sb.AppendLine(lvl.Task.TaskText);
-                result.Add(Answer.SimpleText(request.Message, sb.ToString()));
+                if (!String.IsNullOrWhiteSpace(lvl?.Task?.TaskText))
+                {
+                    sb.AppendLine(lvl.Task.TaskText);
+                }
+                foreach(var task in lvl.Tasks ?? new())
+                {
+                    sb.AppendLine(task.TaskText);
+                }
+                result.Add(Answer.SimpleText(request.Message, sb.ToString(), true));
             }
 
-            return result;
+                return result;
         }
     }
 }

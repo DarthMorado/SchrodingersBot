@@ -19,7 +19,7 @@ namespace SchrodingersBot.Services.Encx
         public static string LoginUrl(string domain) => $"https://{domain}/login/signin?json=1";
         public static string GameUrl(string domain, string gameId) => $"https://{domain}/GameEngines/Encounter/Play/{gameId}?json=1";
 
-        public Task<LoginInfoDTO> GetLoginInfo(long chatId, string domain, string username = null, string password = null);
+        public Task<LoginInfoDTO> GetLoginInfo(long chatId, string domain, string gameId, string username = null, string password = null);
         public Task<EncxGameEngineModel> GetGameAsync(long chatId, string url, LoginInfoDTO loginInfo);
         public Task<EncxGameEngineModel> GetGameAsync(long chatId, string domain, string gameId, LoginInfoDTO loginInfo);
         public Task<bool?> EnterCode(string domain, string gameId, int levelId, int levelNumber, LoginInfoDTO loginInfo, string code);
@@ -27,13 +27,13 @@ namespace SchrodingersBot.Services.Encx
 
     public class EncxService : IEncxService
     {
-        private readonly IDbRepository<EncxLoginInfoEntity> _loginInfoRepository;
+        private readonly IDbRepository<EncxAuthEntity> _loginInfoRepository;
         private readonly IMapper _mapper;
 
         public static string LoginUrl(string domain) => $"https://{domain}/login/signin?json=1";
         public static string GameUrl(string domain, string gameId) => $"https://{domain}/GameEngines/Encounter/Play/{gameId}?json=1";
 
-        public EncxService(IDbRepository<EncxLoginInfoEntity> loginInfoRepository,
+        public EncxService(IDbRepository<EncxAuthEntity> loginInfoRepository,
             IMapper mapper)
         {
             _loginInfoRepository = loginInfoRepository;
@@ -87,7 +87,7 @@ namespace SchrodingersBot.Services.Encx
             return loginInfo;
         }
 
-        public async Task<LoginInfoDTO> GetLoginInfo(long chatId, string domain, string username, string password)
+        public async Task<LoginInfoDTO> GetLoginInfo(long chatId, string domain, string gameId, string username, string password)
         {
             var availableInfo = await _loginInfoRepository.FindAsync(x => x.ChatId == chatId && (string.IsNullOrEmpty(username) || x.Username == username));
 
@@ -101,8 +101,10 @@ namespace SchrodingersBot.Services.Encx
                 }    
 
                 loginInfo = await Login(domain, username, password, null);
-                var loginEntity = _mapper.Map<EncxLoginInfoEntity>(loginInfo);
+                var loginEntity = _mapper.Map<EncxAuthEntity>(loginInfo);
                 loginEntity.ChatId = chatId;
+                loginEntity.Domain = domain;
+                loginEntity.GameId = gameId;
                 await _loginInfoRepository.CreateAsync(loginEntity);
             }
             else

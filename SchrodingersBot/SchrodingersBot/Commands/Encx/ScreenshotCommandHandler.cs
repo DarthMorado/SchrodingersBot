@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -16,22 +17,23 @@ namespace SchrodingersBot.Commands
 {
     public class ScreenshotCommandHandler : IBotCommandHandler<screenshotCommand>
     {
-        private readonly IWebHelperService _webHelperService;
+        //private readonly IWebHelperService _webHelperService;
+        private readonly IEncxEngine _encxEngine;
         private readonly IGameService _gameService;
 
         private readonly IDbRepository<EncxGameSubscriptionEntity> _gameSubscriptionRepository;
-        private readonly IDbRepository<EncxLoginInfoEntity> _loginInfoRepository;
+        private readonly IDbRepository<EncxAuthEntity> _loginInfoRepository;
         private readonly IMapper _mapper;
         private readonly IEncxService _encxService;
 
-        public ScreenshotCommandHandler(IWebHelperService webHelperService,
+        public ScreenshotCommandHandler(IEncxEngine encxEngine,
             IGameService gameService,
             IDbRepository<EncxGameSubscriptionEntity> gameSubscriptionRepository,
-            IDbRepository<EncxLoginInfoEntity> loginInfoRepository,
+            IDbRepository<EncxAuthEntity> loginInfoRepository,
             IMapper mapper,
             IEncxService encxService)
         {
-            _webHelperService = webHelperService;
+            _encxEngine = encxEngine;
             _gameService = gameService;
 
             _gameSubscriptionRepository = gameSubscriptionRepository;
@@ -91,7 +93,12 @@ namespace SchrodingersBot.Commands
             //    Expires = -1
             //});
 
-            byte[] img = await _webHelperService.GetScreenshot(url, activeGame.Domain, loginInfo, cookies);
+            loginInfoEntity.Domain = activeGame.Domain;
+            loginInfoEntity.GameId = activeGame.GameId;
+
+            byte[] img = await _encxEngine.Screenshot(loginInfoEntity);
+
+            //byte[] img = await _webHelperService.GetScreenshot(url, activeGame.Domain, loginInfo, cookies);
 
             return Result.SimpleImage(request.Message, img);
         }

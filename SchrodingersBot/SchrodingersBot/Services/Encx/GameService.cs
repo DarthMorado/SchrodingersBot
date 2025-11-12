@@ -22,12 +22,12 @@ namespace SchrodingersBot.Services.Encx
     public class GameService : IGameService
     {
         private readonly IDbRepository<EncxGameSubscriptionEntity> _gameSubscriptionRepository;
-        private readonly IDbRepository<EncxLoginInfoEntity> _loginInfoRepository;
+        private readonly IDbRepository<EncxAuthEntity> _loginInfoRepository;
         private readonly IMapper _mapper;
         private readonly IEncxService _encxService;
 
         public GameService(IDbRepository<EncxGameSubscriptionEntity> gameSubscriptionRepository,
-            IDbRepository<EncxLoginInfoEntity> loginInfoRepository,
+            IDbRepository<EncxAuthEntity> loginInfoRepository,
             IMapper mapper,
             IEncxService encxService)
         {

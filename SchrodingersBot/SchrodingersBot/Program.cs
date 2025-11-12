@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging.EventLog;
 using Microsoft.Extensions.Logging;
 using SchrodingersBot.Services.Logging;
 using SchrodingersBot.Services.Encx;
+using SchrodingersBot.Services.Web;
 
 namespace SchrodingersBot
 {
@@ -38,7 +39,7 @@ namespace SchrodingersBot
                 {
                     SourceName = "Morado.TG",
                     LogName = "SchrodingersBot"
-                });
+                }); //todo: Does not work.
 
                 log.AddProvider(new BotLoggerProvider());
             });
@@ -87,7 +88,9 @@ namespace SchrodingersBot
             services.AddScoped(typeof(IAreasService), typeof(AreasService));
             services.AddScoped<IEncxService, EncxService>();
             services.AddScoped<IGameService, GameService>();
-            services.AddScoped<IWebHelperService, WebHelperService>();
+            //services.AddScoped<IWebHelperService, WebHelperService>();
+            services.AddSingleton<BrowserPool>();
+            services.AddScoped<IEncxEngine, EncxEngine>();
             
         }
 
