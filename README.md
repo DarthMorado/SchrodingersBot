@@ -23,6 +23,7 @@ SchrodingersBot
 [x] /stopgame   
 [ ] /joingame_onetimepassword   
 [ ] /encxlogin  
+[x] /task   
 [x] .code  
 [ ] /a - address2cords and cords2address  
 [x] /screenshot   
