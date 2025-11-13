@@ -26,7 +26,7 @@ namespace SchrodingersBot.Services.Encx
             _browserPool = browserPool;
         }
 
-        public async Task<EncxAuthEntity?> EnsureAuth(EncxAuthEntity loginInfo)
+        public async Task<EncxAuthEntity> EnsureAuth(EncxAuthEntity loginInfo)
         {
             var browserKey = _BrowserKey(loginInfo.Id);
             var page = await _browserPool.GetOrCreateAsync(browserKey);
@@ -83,12 +83,12 @@ namespace SchrodingersBot.Services.Encx
             var browserKey = _BrowserKey(loginInfo.Id);
             var page = await _browserPool.GetOrCreateAsync(browserKey);
 
-            await page.GoToAsync(_GameUrlJson(loginInfo.Domain, loginInfo.GameId), new NavigationOptions
+            var response = await page.GoToAsync(_GameUrlJson(loginInfo.Domain, loginInfo.GameId), new NavigationOptions
             {
                 WaitUntil = new[] { WaitUntilNavigation.Load }
             });
 
-            var content = await page.GetContentAsync();
+            var content = await response.TextAsync();
 
             var gameObject = JsonSerializer.Deserialize<EncxGameEngineModel>(content);
 
@@ -101,15 +101,26 @@ namespace SchrodingersBot.Services.Encx
             return passwordNode != null;
         }
 
-        public async Task<EncxAuthEntity?> Login(EncxAuthEntity loginInfo)
+        public async Task<EncxAuthEntity> Login(EncxAuthEntity loginInfo)
         {
             var browserKey = _BrowserKey(loginInfo.Id);
             var page = await _browserPool.GetOrCreateAsync(browserKey);
-            
+
             await page.GoToAsync(_LoginPage(loginInfo.Domain));
             var cnt = await page.GetContentAsync(); 
             await page.TypeAsync("input[id='txtLogin']", loginInfo.Username);
             await page.TypeAsync("input[id='txtPassword']", loginInfo.Password);
+            await page.WaitForSelectorAsync("input[type='submit']", new WaitForSelectorOptions
+            {
+                Visible = true // ensures it’s rendered
+            });
+            var box = await page.QuerySelectorAsync("input[type='submit']");
+            await box.ScrollIntoViewAsync();
+            var visible = await box.IsIntersectingViewportAsync();
+            if (!visible)
+            {
+                await box.ScrollIntoViewAsync();
+            }
             await page.ClickAsync("input[type='submit']");
             await page.WaitForNavigationAsync();
 

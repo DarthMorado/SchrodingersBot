@@ -11,8 +11,8 @@ namespace SchrodingersBot.Services.Encx
 {
     public interface IEncxEngine
     {
-        Task<EncxAuthEntity?> Login(EncxAuthEntity loginInfo); //add magic numbers
-        Task<EncxAuthEntity?> EnsureAuth(EncxAuthEntity loginInfo);
+        Task<EncxAuthEntity> Login(EncxAuthEntity loginInfo); //add magic numbers
+        Task<EncxAuthEntity> EnsureAuth(EncxAuthEntity loginInfo);
         Task<byte[]> Screenshot(EncxAuthEntity loginInfo);
         
         Task<bool> IsLoginPage(HtmlDocument document);

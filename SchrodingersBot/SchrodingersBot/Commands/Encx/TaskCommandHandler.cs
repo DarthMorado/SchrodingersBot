@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using HtmlAgilityPack;
 using NotABot.Wrapper;
 using SchrodingersBot.DB.DBO;
 using SchrodingersBot.DB.Repositories;
@@ -6,6 +7,7 @@ using SchrodingersBot.DTO.EnGame;
 using SchrodingersBot.Services.Encx;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -98,9 +100,18 @@ namespace SchrodingersBot.Commands
                 }
                 foreach(var task in lvl.Tasks ?? new())
                 {
-                    sb.AppendLine(task.TaskText);
+                    HtmlDocument doc = new HtmlDocument();
+                    doc.LoadHtml($"<html><body>{task.TaskText}</body></html>");
+                    var txt = doc.DocumentNode.InnerText.Trim();
+                    if (!String.IsNullOrWhiteSpace(txt))
+                    {
+                        sb.AppendLine(txt);
+                    }
                 }
-                result.Add(Answer.SimpleText(request.Message, sb.ToString(), true));
+                if (sb.Length > 0)
+                {
+                    result.Add(Answer.SimpleText(request.Message, sb.ToString(), true));
+                }
             }
 
                 return result;
