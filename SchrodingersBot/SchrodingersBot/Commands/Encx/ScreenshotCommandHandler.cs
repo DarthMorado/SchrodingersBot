@@ -24,14 +24,12 @@ namespace SchrodingersBot.Commands
         private readonly IDbRepository<EncxGameSubscriptionEntity> _gameSubscriptionRepository;
         private readonly IDbRepository<EncxAuthEntity> _loginInfoRepository;
         private readonly IMapper _mapper;
-        private readonly IEncxService _encxService;
 
         public ScreenshotCommandHandler(IEncxEngine encxEngine,
             IGameService gameService,
             IDbRepository<EncxGameSubscriptionEntity> gameSubscriptionRepository,
             IDbRepository<EncxAuthEntity> loginInfoRepository,
-            IMapper mapper,
-            IEncxService encxService)
+            IMapper mapper)
         {
             _encxEngine = encxEngine;
             _gameService = gameService;
@@ -39,7 +37,6 @@ namespace SchrodingersBot.Commands
             _gameSubscriptionRepository = gameSubscriptionRepository;
             _loginInfoRepository = loginInfoRepository;
             _mapper = mapper;
-            _encxService = encxService;
         }
 
         private static string GameUrl(string domain, string gameId) => $"https://{domain}/GameEngines/Encounter/Play/{gameId}";
@@ -59,29 +56,29 @@ namespace SchrodingersBot.Commands
                 return null;
             }
             var loginInfoEntity = await _loginInfoRepository.GetByIdAsync(activeGame.LoginInfoId.Value);
-            var loginInfo = _mapper.Map<LoginInfoDTO>(loginInfoEntity);
+            //var loginInfo = _mapper.Map<LoginInfoDTO>(loginInfoEntity);
 
             var url = GameUrl(activeGame.Domain, activeGame.GameId);
 
             List<CookieParam> cookies = new();
-            cookies.Add(new CookieParam()
-            {
-                Name = "GUID",
-                Value = loginInfo.Guid,
-                Domain = $"{activeGame.Domain}",
-            });
-            cookies.Add(new CookieParam()
-            {
-                Name = "stoken",
-                Value = loginInfo.Stoken,
-                Domain = $".{activeGame.Domain}",
-            });
-            cookies.Add(new CookieParam()
-            {
-                Name = "atoken",
-                Value = loginInfo.Atoken,
-                Domain = ".en.cx",
-            });
+            //cookies.Add(new CookieParam()
+            //{
+            //    Name = "GUID",
+            //    Value = loginInfo.Guid,
+            //    Domain = $"{activeGame.Domain}",
+            //});
+            //cookies.Add(new CookieParam()
+            //{
+            //    Name = "stoken",
+            //    Value = loginInfo.Stoken,
+            //    Domain = $".{activeGame.Domain}",
+            //});
+            //cookies.Add(new CookieParam()
+            //{
+            //    Name = "atoken",
+            //    Value = loginInfo.Atoken,
+            //    Domain = ".en.cx",
+            //});
             //cookies.Add(new CookieParam()
             //{
             //    Name = "Domain",

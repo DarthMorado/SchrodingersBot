@@ -20,20 +20,17 @@ namespace SchrodingersBot.Commands
     {
         private readonly IDbRepository<EncxGameSubscriptionEntity> _gameSubscriptionRepository;
         private readonly IDbRepository<EncxAuthEntity> _loginInfoRepository;
-        private readonly IEncxService _encxService;
         private readonly IEncxEngine _engine;
         private readonly IMapper _mapper;
 
         public TaskCommandHandler(IDbRepository<EncxGameSubscriptionEntity> gameSubscriptionRepository,
             IDbRepository<EncxAuthEntity> loginInfoRepository,
-            IEncxService encxService,
             IEncxEngine engine,
             IMapper mapper)
         {
             _engine = engine;
             _gameSubscriptionRepository = gameSubscriptionRepository;
             _loginInfoRepository = loginInfoRepository;
-            _encxService = encxService;
             _mapper = mapper;
         }
 
@@ -53,8 +50,6 @@ namespace SchrodingersBot.Commands
                 return null;
             }
             var loginInfoEntity = await _loginInfoRepository.GetByIdAsync(activeGame.LoginInfoId.Value);
-            var loginInfo = _mapper.Map<LoginInfoDTO>(loginInfoEntity);
-
 
             loginInfoEntity.Domain = activeGame.Domain;
             loginInfoEntity.GameId = activeGame.GameId;

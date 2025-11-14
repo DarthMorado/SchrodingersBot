@@ -9,6 +9,8 @@ using HtmlAgilityPack;
 using SchrodingersBot.DB.DBO;
 using SchrodingersBot.Services.Web;
 using SchrodingersBot.DTO.Encx;
+using System.Text.Encodings.Web;
+using System.Web;
 
 namespace SchrodingersBot.Services.Encx
 {
@@ -19,6 +21,7 @@ namespace SchrodingersBot.Services.Encx
         private string _LoginPage(string domain) => $"https://{domain}/login/signin";
         private string _LoginPagePasswordNodePath { get => "//div[@class='formmain']//input[@id='txtPassword']"; }
         private string _GameUrlJson(string domain, string gameId) => $"https://{domain}/GameEngines/Encounter/Play/{gameId}?json=1";
+        private string _GamePOSTUrlJson(string domain, string gameId, string postData) => $"https://{domain}/GameEngines/Encounter/Play/{gameId}?json=1&postdata={HttpUtility.UrlEncode(postData)}";
         private string _GameUrl(string domain, string gameId) => $"https://{domain}/GameEngines/Encounter/Play/{gameId}";
 
         public EncxEngine(BrowserPool browserPool)
@@ -50,28 +53,37 @@ namespace SchrodingersBot.Services.Encx
             return loginInfo;
         }
 
-        public async Task<EncxGameEngineModel?> EnterCode(EncxAuthEntity loginInfo, string code)
+        public async Task<EncxGameEngineModel?> EnterCode(EncxAuthEntity loginInfo, int lvlId, int lvlNumber, string code)
         {
             loginInfo = await EnsureAuth(loginInfo);
 
             var browserKey = _BrowserKey(loginInfo.Id);
             var page = await _browserPool.GetOrCreateAsync(browserKey);
 
-            var payload = new { name = "John", age = 30 };
+            var payload = $"LevelId={lvlId}&LevelNumber={lvlNumber}&LevelAction.Answer={code}";
 
-            var result = await page.EvaluateFunctionAsync<string>(
-            @"async (url, data) => {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                const json = await response.json();
-                return json;
-            }",
-            _GameUrlJson(loginInfo.Domain, loginInfo.GameId), payload);
+            //page.AddRequestInterceptor(async (request) =>
+            //{
+            //    await request.ContinueAsync(new Payload
+            //    {
+            //        Method = HttpMethod.Post,
+            //        PostData = payload,
+            //        Headers = new Dictionary<string, string>
+            //        {
+            //            ["Content-Type"] = "application/x-www-form-urlencoded"
+            //        }
+            //    });
+            //});
 
-            var gameObject = JsonSerializer.Deserialize<EncxGameEngineModel>(result);
+            var response = await page.GoToAsync(_GamePOSTUrlJson(loginInfo.Domain, loginInfo.GameId, payload), new NavigationOptions
+            {
+                WaitUntil = new[] { WaitUntilNavigation.Load }
+                
+            });
+
+            var content = await response.TextAsync();
+
+            var gameObject = JsonSerializer.Deserialize<EncxGameEngineModel>(content);
 
             return gameObject;
         }
@@ -107,7 +119,7 @@ namespace SchrodingersBot.Services.Encx
             var page = await _browserPool.GetOrCreateAsync(browserKey);
 
             await page.GoToAsync(_LoginPage(loginInfo.Domain));
-            var cnt = await page.GetContentAsync(); 
+            var cnt = await page.GetContentAsync();
             await page.TypeAsync("input[id='txtLogin']", loginInfo.Username);
             await page.TypeAsync("input[id='txtPassword']", loginInfo.Password);
             await page.WaitForSelectorAsync("input[type='submit']", new WaitForSelectorOptions

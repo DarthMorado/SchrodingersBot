@@ -22,7 +22,7 @@ namespace SchrodingersBot.Services.Encx
         /// Check if login
         /// revisit again
         /// </summary>
-        Task<EncxGameEngineModel?> GetGameObject(EncxAuthEntity loginInfo); 
-        Task<EncxGameEngineModel?> EnterCode(EncxAuthEntity loginInfo, string code);
+        Task<EncxGameEngineModel?> GetGameObject(EncxAuthEntity loginInfo);
+        Task<EncxGameEngineModel?> EnterCode(EncxAuthEntity loginInfo, int lvlId, int lvlNumber, string code);
     }
 }

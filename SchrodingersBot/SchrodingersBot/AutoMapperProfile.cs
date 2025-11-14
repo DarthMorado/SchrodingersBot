@@ -13,8 +13,8 @@ namespace SchrodingersBot
     {
         public AutoMapperProfile()
         {
-            CreateMap<EncxAuthEntity, LoginInfoDTO>();
-            CreateMap<LoginInfoDTO, EncxAuthEntity>();
+            //CreateMap<EncxAuthEntity, LoginInfoDTO>();
+            //CreateMap<LoginInfoDTO, EncxAuthEntity>();
         }
     }
 }

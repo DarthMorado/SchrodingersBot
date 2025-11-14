@@ -13,9 +13,13 @@ namespace SchrodingersBot.Commands
     {
         private readonly IGameService _gameService;
 
-        public EnterCodeCommandHandler(IGameService gameService)
+        private readonly IEncxEngine _encxEngine;
+
+        public EnterCodeCommandHandler(IGameService gameService,
+            IEncxEngine encxEngine)
         {
             _gameService = gameService;
+            _encxEngine = encxEngine;
         }
 
         public async Task<Result> Handle(entercodeCommand request, CancellationToken cancellationToken)
@@ -23,12 +27,19 @@ namespace SchrodingersBot.Commands
             bool? isCorrect = null;
 
             var game = await _gameService.GetActiveGame(request.Message.ChatId);
-            if (!CheckIfCanSendCode(game))
+
+            if (game is null)
             {
-                return Result.Reaction(request.Message, Answer.ReactionType.Unknown);
+                return null;
             }
 
-            isCorrect = await _gameService.EnterCode(request.Message.ChatId, request.Message.Parameter);
+            var gameState = await _encxEngine.EnterCode(game.LoginInfo, game.ActiveLevelId, game.ActiveLevelNumber, request.Message.Parameter);
+
+
+            //_encxEngine.EnterCode()
+
+            isCorrect = gameState?.EngineAction?.LevelAction?.IsCorrectAnswer ??
+                        gameState?.EngineAction?.BonusAction?.IsCorrectAnswer;
 
             return Result.Reaction(request.Message, isCorrect switch
             {

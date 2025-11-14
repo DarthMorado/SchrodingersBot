@@ -86,7 +86,6 @@ namespace SchrodingersBot
             services.AddScoped(typeof(ICoordinatesProcessingService), typeof(CoordinatesProcessingService));
             services.AddScoped(typeof(ITextProcessingService), typeof(TextProcessingService));
             services.AddScoped(typeof(IAreasService), typeof(AreasService));
-            services.AddScoped<IEncxService, EncxService>();
             services.AddScoped<IGameService, GameService>();
             //services.AddScoped<IWebHelperService, WebHelperService>();
             services.AddSingleton<BrowserPool>();

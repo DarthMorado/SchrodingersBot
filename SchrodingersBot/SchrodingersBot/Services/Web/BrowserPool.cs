@@ -1,4 +1,9 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Reflection.PortableExecutable;
+using System.Web;
+using AutoMapper.Configuration.Annotations;
+using Azure;
 using PuppeteerSharp;
 
 namespace SchrodingersBot.Services.Web
@@ -31,25 +36,52 @@ namespace SchrodingersBot.Services.Web
             page.Request += async (sender, e) =>
             {
                 var request = e.Request;
+                var uri = new Uri(request.Url);
+                var query = HttpUtility.ParseQueryString(uri.Query);
+
+                Payload? payload = null;
 
                 // 3. Define a condition (e.g., if the URL contains "/api/")
                 if (request.Url.Contains("?json=1"))
                 {
-                    // Create a copy of the existing headers
                     var headers = new Dictionary<string, string>(request.Headers.ToDictionary(h => h.Key, h => h.Value));
-
-                    // 4. Set/Override the Accept header
                     headers["Accept"] = "application/json";
 
-                    // 5. Continue the request with modified headers
-                    await request.ContinueAsync(new Payload { Headers = headers });
+                    payload = payload ?? new Payload();
+                    payload.Headers = headers;
+                }
+
+                if (query.HasKeys() && query.AllKeys.Contains("postdata"))
+                {
+                    var postData = query.GetValues("postdata").First();
+
+                    payload = payload ?? new Payload();
+                    payload.Url = request.Url;
+                    payload.HasPostData = true;
+                    payload.Method = HttpMethod.Post;
+                    payload.PostData = HttpUtility.UrlDecode(postData);
+                }
+
+                if (payload is null)
+                {
+                    await request.ContinueAsync();
                 }
                 else
                 {
-                    // For all other requests, continue without changes
-                    await request.ContinueAsync();
+                    await request.ContinueAsync(payload);
                 }
             };
+
+            page.Request += (sender, e) =>
+            {
+                Console.WriteLine($"[Request] {e.Request.Method} {e.Request.Url}");
+            };
+
+            page.Response += (sender, e) =>
+            {
+                Console.WriteLine($"[Response] {e.Response.Status} {e.Response.Url}");
+            };
+
             _browsers[key] = browser;
             return page;
         }
@@ -72,5 +104,6 @@ namespace SchrodingersBot.Services.Web
             }
             _browsers.Clear();
         }
+
     }
 }
