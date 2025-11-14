@@ -9,6 +9,7 @@ SchrodingersBot
 [x] v.1.0 - error handling  
 [x] v.1.1 - game/task/codes info     
 [ ] v.1.2 - game/task/codes info  - webbrowser   
+[ ] v.1.3 - format hints/bonuses/... + autoupdate + awailability in multiple chats   
    
 [ ] v.1.x - follow users   
 [ ] v.1.y - addresses / KML / OSM  / grauzti   
@@ -28,12 +29,14 @@ SchrodingersBot
 [ ] /a - address2cords and cords2address  
 [x] /screenshot   
 [ ] /follow - for coordinates format (take latest and add "X km (approx time) for user U")     
-[ ] /setprefox   
-# Known Problems:
+[ ] /setprefix   
 
+# Known Problems:
+[ ] Screenshot can cut page and show only part   
 
 # BackLog:
 [ ] /askai with reply to comment  
 [ ] write logs to TG chat from config
+[ ] write browser logs : GET/POST logs
 [ ] IEnumerable + yield
 [ ] Add prefixes to codes
