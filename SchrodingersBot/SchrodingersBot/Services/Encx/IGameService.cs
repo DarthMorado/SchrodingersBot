@@ -12,6 +12,6 @@ namespace SchrodingersBot.Services.Encx
     public interface IGameService
     {
         public Task<EncxGameSubscriptionEntity?> GetActiveGame(long chatId);
-        public Task<Result> FormatGameState(IncomingMessage message, EncxGameEngineModel game);
+        public Task<Result> FormatGameState(IncomingMessage message, EncxGameEngineModel game, bool needScreenshot = false);
     }
 }

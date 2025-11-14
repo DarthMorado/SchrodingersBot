@@ -56,7 +56,7 @@ namespace SchrodingersBot.Commands
                 game.ActiveLevelNumber = gameState.Level.Number;
                 await _subscriptionsRepository.UpdateAsync(game);
 
-                result.AddRange(await _gameService.FormatGameState(request.Message, gameState));
+                result.AddRange(await _gameService.FormatGameState(request.Message, gameState, true));
             }
 
             return result;

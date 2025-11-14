@@ -66,7 +66,7 @@ namespace SchrodingersBot.Commands
                 return null;
             }
             
-            return await _gameService.FormatGameState(request.Message, game);
+            return await _gameService.FormatGameState(request.Message, game, true);
         }
     }
 }

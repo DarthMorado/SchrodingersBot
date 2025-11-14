@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using Azure.Core;
 using HtmlAgilityPack;
+using MediatR;
 using Microsoft.Identity.Client;
 using NotABot.Wrapper;
 using PuppeteerSharp;
+using SchrodingersBot.Commands;
 using SchrodingersBot.DB.DBO;
 using SchrodingersBot.DB.Repositories;
 using SchrodingersBot.DTO.Encx;
@@ -22,18 +24,21 @@ namespace SchrodingersBot.Services.Encx
         private readonly IDbRepository<EncxGameSubscriptionEntity> _gameSubscriptionRepository;
         private readonly IDbRepository<EncxAuthEntity> _loginInfoRepository;
         private readonly IMapper _mapper;
+        private readonly IMediator _mediator;
 
         public GameService(IDbRepository<EncxGameSubscriptionEntity> gameSubscriptionRepository,
             IDbRepository<EncxAuthEntity> loginInfoRepository,
-            IMapper mapper
+            IMapper mapper,
+            IMediator mediator
             )
         {
+            _mediator = mediator;
             _gameSubscriptionRepository = gameSubscriptionRepository;
             _loginInfoRepository = loginInfoRepository;
             _mapper = mapper;
         }
 
-        public async Task<Result> FormatGameState(IncomingMessage message, EncxGameEngineModel game)
+        public async Task<Result> FormatGameState(IncomingMessage message, EncxGameEngineModel game, bool needScreenshot = false)
         {
             Result result = new();
 
@@ -86,6 +91,11 @@ namespace SchrodingersBot.Services.Encx
                 {
                     result.Add(Answer.SimpleText(message, sb.ToString(), true));
                 }
+            }
+
+            if (needScreenshot)
+            {
+                result.AddRange(await _mediator.Send(new screenshotCommand() { Message = message }));
             }
 
             return result;
