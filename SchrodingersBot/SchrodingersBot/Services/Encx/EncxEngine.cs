@@ -60,30 +60,35 @@ namespace SchrodingersBot.Services.Encx
             var browserKey = _BrowserKey(loginInfo.Id);
             var page = await _browserPool.GetOrCreateAsync(browserKey);
 
-            var payload = $"LevelId={lvlId}&LevelNumber={lvlNumber}&LevelAction.Answer={code}";
+            var payload = new
+            {
+                LevelId = lvlId,
+                LevelNumber = lvlNumber,
+                LevelAction = new { Answer = code }
+            };
 
-            //page.AddRequestInterceptor(async (request) =>
+            var json = JsonSerializer.Serialize(payload);
+
+            var result = await page.EvaluateFunctionAsync<string>(@"async (url, data) => {
+    const resp = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:  data
+    });
+    return resp.text();  // or resp.json()
+}", _GameUrlJson(loginInfo.Domain, loginInfo.GameId), json);
+
+            //var response = await page.GoToAsync(_GamePOSTUrlJson(loginInfo.Domain, loginInfo.GameId, payload), new NavigationOptions
             //{
-            //    await request.ContinueAsync(new Payload
-            //    {
-            //        Method = HttpMethod.Post,
-            //        PostData = payload,
-            //        Headers = new Dictionary<string, string>
-            //        {
-            //            ["Content-Type"] = "application/x-www-form-urlencoded"
-            //        }
-            //    });
+            //    WaitUntil = new[] { WaitUntilNavigation.Load }
+
             //});
 
-            var response = await page.GoToAsync(_GamePOSTUrlJson(loginInfo.Domain, loginInfo.GameId, payload), new NavigationOptions
-            {
-                WaitUntil = new[] { WaitUntilNavigation.Load }
-                
-            });
+            //var content = await response.TextAsync();
 
-            var content = await response.TextAsync();
+            var gameObject = JsonSerializer.Deserialize<EncxGameEngineModel>(result);
 
-            var gameObject = JsonSerializer.Deserialize<EncxGameEngineModel>(content);
+            //return gameObject;
 
             return gameObject;
         }
