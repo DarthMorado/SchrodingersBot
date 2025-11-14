@@ -21,13 +21,16 @@ namespace SchrodingersBot.Commands
         private readonly IDbRepository<EncxGameSubscriptionEntity> _gameSubscriptionRepository;
         private readonly IDbRepository<EncxAuthEntity> _loginInfoRepository;
         private readonly IEncxEngine _engine;
+        private readonly IGameService _gameService;
         private readonly IMapper _mapper;
 
         public TaskCommandHandler(IDbRepository<EncxGameSubscriptionEntity> gameSubscriptionRepository,
             IDbRepository<EncxAuthEntity> loginInfoRepository,
             IEncxEngine engine,
+            IGameService gameService,
             IMapper mapper)
         {
+            _gameService = gameService;
             _engine = engine;
             _gameSubscriptionRepository = gameSubscriptionRepository;
             _loginInfoRepository = loginInfoRepository;
@@ -58,58 +61,12 @@ namespace SchrodingersBot.Commands
 
             var game = await _engine.GetGameObject(loginInfoEntity);
 
-            var lvl = game.Level;
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine($"Уровень {lvl.Number}/{game.Levels.Count} {lvl.Name}");
-            if (lvl.Bonuses != null && lvl.Bonuses.Any())
+            if (game is null)
             {
-                sb.AppendLine($"На уровне бонусы. ({lvl.Bonuses.Count})");
-                foreach(var bonus in lvl.Bonuses.OrderBy(x => x.Number))
-                {
-                    sb.AppendLine($"{bonus.Number}: {bonus.Name} ({(bonus.Negative ? "-" : "")}{bonus.AwardTime}с)");
-                    if (!String.IsNullOrWhiteSpace(bonus.Task))
-                    {
-                        sb.AppendLine(bonus.Task);
-                    }
-                    
-                }
+                return null;
             }
-            sb.AppendLine($"Секторов для закрытия:{lvl.RequiredSectorsCount}");
-            if (lvl.Sectors != null)
-            {
-                foreach (var sector in lvl.Sectors.OrderBy(x => x.Order))
-                {
-                    sb.AppendLine($"{sector.Order}: {sector.Name} ({sector.Answer})"); //todo
-                }
-            }
-
-            result.Add(Answer.SimpleText(request.Message, sb.ToString()));
             
-            sb = new StringBuilder();
-            if (lvl.Task != null || lvl.Tasks != null)
-            {
-                sb.AppendLine($"Задание:");
-                if (!String.IsNullOrWhiteSpace(lvl?.Task?.TaskText))
-                {
-                    sb.AppendLine(lvl.Task.TaskText);
-                }
-                foreach(var task in lvl.Tasks ?? new())
-                {
-                    HtmlDocument doc = new HtmlDocument();
-                    doc.LoadHtml($"<html><body>{task.TaskText}</body></html>");
-                    var txt = doc.DocumentNode.InnerText.Trim();
-                    if (!String.IsNullOrWhiteSpace(txt))
-                    {
-                        sb.AppendLine(txt);
-                    }
-                }
-                if (sb.Length > 0)
-                {
-                    result.Add(Answer.SimpleText(request.Message, sb.ToString(), true));
-                }
-            }
-
-                return result;
+            return await _gameService.FormatGameState(request.Message, game);
         }
     }
 }

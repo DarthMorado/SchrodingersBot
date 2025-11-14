@@ -1,4 +1,6 @@
-﻿using SchrodingersBot.DB.DBO;
+﻿using NotABot.Wrapper;
+using SchrodingersBot.DB.DBO;
+using SchrodingersBot.DTO.Encx;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,5 +12,6 @@ namespace SchrodingersBot.Services.Encx
     public interface IGameService
     {
         public Task<EncxGameSubscriptionEntity?> GetActiveGame(long chatId);
+        public Task<Result> FormatGameState(IncomingMessage message, EncxGameEngineModel game);
     }
 }

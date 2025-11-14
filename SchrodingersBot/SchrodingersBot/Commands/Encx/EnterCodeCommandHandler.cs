@@ -1,4 +1,6 @@
 ﻿using NotABot.Wrapper;
+using SchrodingersBot.DB.DBO;
+using SchrodingersBot.DB.Repositories;
 using SchrodingersBot.DTO.Encx;
 using SchrodingersBot.Services.Encx;
 using System;
@@ -12,12 +14,15 @@ namespace SchrodingersBot.Commands
     public class EnterCodeCommandHandler : IBotCommandHandler<entercodeCommand>
     {
         private readonly IGameService _gameService;
-
         private readonly IEncxEngine _encxEngine;
+        private readonly IDbRepository<EncxGameSubscriptionEntity> _subscriptionsRepository;
 
         public EnterCodeCommandHandler(IGameService gameService,
-            IEncxEngine encxEngine)
+            IEncxEngine encxEngine,
+            IDbRepository<EncxGameSubscriptionEntity> subscriptionsRepository
+            )
         {
+            _subscriptionsRepository = subscriptionsRepository; 
             _gameService = gameService;
             _encxEngine = encxEngine;
         }
@@ -35,18 +40,26 @@ namespace SchrodingersBot.Commands
 
             var gameState = await _encxEngine.EnterCode(game.LoginInfo, game.ActiveLevelId, game.ActiveLevelNumber, request.Message.Parameter);
 
-
-            //_encxEngine.EnterCode()
-
             isCorrect = gameState?.EngineAction?.LevelAction?.IsCorrectAnswer ??
                         gameState?.EngineAction?.BonusAction?.IsCorrectAnswer;
 
-            return Result.Reaction(request.Message, isCorrect switch
+            var result = Result.Reaction(request.Message, isCorrect switch
             {
                 true => Answer.ReactionType.Heart,
                 false => Answer.ReactionType.Shit,
                 _ => Answer.ReactionType.Unknown
             });
+
+            if (gameState.Level.LevelId != game.ActiveLevelId)
+            {
+                game.ActiveLevelId = gameState.Level.LevelId;
+                game.ActiveLevelNumber = gameState.Level.Number;
+                await _subscriptionsRepository.UpdateAsync(game);
+
+                result.AddRange(await _gameService.FormatGameState(request.Message, gameState));
+            }
+
+            return result;
         }
 
         private bool CheckIfCanSendCode(EncxGameEngineModel? game)
