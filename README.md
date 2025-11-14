@@ -35,8 +35,8 @@ SchrodingersBot
 [ ] Screenshot can cut page and show only part   
 
 # BackLog:
-[ ] /askai with reply to comment  
-[ ] write logs to TG chat from config
-[ ] write browser logs : GET/POST logs
-[ ] IEnumerable + yield
-[ ] Add prefixes to codes
+[ ] /askai with reply to comment   
+[ ] write logs to TG chat from config   
+[ ] write browser logs : GET/POST logs   
+[ ] IEnumerable + yield   
+[ ] Add prefixes to codes   
