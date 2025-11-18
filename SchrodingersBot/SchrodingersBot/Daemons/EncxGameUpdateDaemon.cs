@@ -38,16 +38,16 @@ namespace SchrodingersBot.Daemons
             foreach (var activeSubscription in activeSubscriptions)
             {
                 var activeGame = await _gameService.GetActiveGame(activeSubscription.ChatId);
-                if (activeGame?.Level is null)
+                if (activeGame is null)
                 {
                     continue;
                 }
-                if (activeGame.Level.Number <= activeSubscription.ActiveLevelNumber)
+                if (activeGame.ActiveLevelNumber <= activeSubscription.ActiveLevelNumber)
                 {
                     continue;
                 }
-                activeSubscription.ActiveLevelId = activeGame.Level.LevelId;
-                activeSubscription.ActiveLevelNumber = activeGame.Level.Number;
+                activeSubscription.ActiveLevelId = activeGame.ActiveLevelId;
+                activeSubscription.ActiveLevelNumber = activeGame.ActiveLevelNumber;
                 await _gameSubscriptionsRepository.UpdateAsync(activeSubscription);
 
                 var task = await _mediator.Send(new taskCommand()
