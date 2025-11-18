@@ -28,6 +28,7 @@ namespace SchrodingersBot.DTO.Encx
         public List<EncxMixedAction> MixedActions { get; set; } //История введенных ответов
         public List<EncxMessage> Messages { get; set; } //Сообщения администратора
         public EncxTask Task { get; set; } //Текст задания
+        public List<EncxTask> Tasks { get; set; } //Текст задания
         public List<EncxSector> Sectors { get; set; } //Сектора
         public List<EncxHelp> Helps { get; set; } //Подсказки
         public List<EncxHelp> PenaltyHelps { get; set; } //Штрафные подсказки

@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -16,28 +17,26 @@ namespace SchrodingersBot.Commands
 {
     public class ScreenshotCommandHandler : IBotCommandHandler<screenshotCommand>
     {
-        private readonly IWebHelperService _webHelperService;
+        //private readonly IWebHelperService _webHelperService;
+        private readonly IEncxEngine _encxEngine;
         private readonly IGameService _gameService;
 
         private readonly IDbRepository<EncxGameSubscriptionEntity> _gameSubscriptionRepository;
-        private readonly IDbRepository<EncxLoginInfoEntity> _loginInfoRepository;
+        private readonly IDbRepository<EncxAuthEntity> _loginInfoRepository;
         private readonly IMapper _mapper;
-        private readonly IEncxService _encxService;
 
-        public ScreenshotCommandHandler(IWebHelperService webHelperService,
+        public ScreenshotCommandHandler(IEncxEngine encxEngine,
             IGameService gameService,
             IDbRepository<EncxGameSubscriptionEntity> gameSubscriptionRepository,
-            IDbRepository<EncxLoginInfoEntity> loginInfoRepository,
-            IMapper mapper,
-            IEncxService encxService)
+            IDbRepository<EncxAuthEntity> loginInfoRepository,
+            IMapper mapper)
         {
-            _webHelperService = webHelperService;
+            _encxEngine = encxEngine;
             _gameService = gameService;
 
             _gameSubscriptionRepository = gameSubscriptionRepository;
             _loginInfoRepository = loginInfoRepository;
             _mapper = mapper;
-            _encxService = encxService;
         }
 
         private static string GameUrl(string domain, string gameId) => $"https://{domain}/GameEngines/Encounter/Play/{gameId}";
@@ -57,29 +56,29 @@ namespace SchrodingersBot.Commands
                 return null;
             }
             var loginInfoEntity = await _loginInfoRepository.GetByIdAsync(activeGame.LoginInfoId.Value);
-            var loginInfo = _mapper.Map<LoginInfoDTO>(loginInfoEntity);
+            //var loginInfo = _mapper.Map<LoginInfoDTO>(loginInfoEntity);
 
             var url = GameUrl(activeGame.Domain, activeGame.GameId);
 
             List<CookieParam> cookies = new();
-            cookies.Add(new CookieParam()
-            {
-                Name = "GUID",
-                Value = loginInfo.Guid,
-                Domain = $"{activeGame.Domain}",
-            });
-            cookies.Add(new CookieParam()
-            {
-                Name = "stoken",
-                Value = loginInfo.Stoken,
-                Domain = $".{activeGame.Domain}",
-            });
-            cookies.Add(new CookieParam()
-            {
-                Name = "atoken",
-                Value = loginInfo.Atoken,
-                Domain = ".en.cx",
-            });
+            //cookies.Add(new CookieParam()
+            //{
+            //    Name = "GUID",
+            //    Value = loginInfo.Guid,
+            //    Domain = $"{activeGame.Domain}",
+            //});
+            //cookies.Add(new CookieParam()
+            //{
+            //    Name = "stoken",
+            //    Value = loginInfo.Stoken,
+            //    Domain = $".{activeGame.Domain}",
+            //});
+            //cookies.Add(new CookieParam()
+            //{
+            //    Name = "atoken",
+            //    Value = loginInfo.Atoken,
+            //    Domain = ".en.cx",
+            //});
             //cookies.Add(new CookieParam()
             //{
             //    Name = "Domain",
@@ -91,7 +90,12 @@ namespace SchrodingersBot.Commands
             //    Expires = -1
             //});
 
-            byte[] img = await _webHelperService.GetScreenshot(url, activeGame.Domain, loginInfo, cookies);
+            loginInfoEntity.Domain = activeGame.Domain;
+            loginInfoEntity.GameId = activeGame.GameId;
+
+            byte[] img = await _encxEngine.Screenshot(loginInfoEntity);
+
+            //byte[] img = await _webHelperService.GetScreenshot(url, activeGame.Domain, loginInfo, cookies);
 
             return Result.SimpleImage(request.Message, img);
         }

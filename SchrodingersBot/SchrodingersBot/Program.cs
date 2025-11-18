@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging.EventLog;
 using Microsoft.Extensions.Logging;
 using SchrodingersBot.Services.Logging;
 using SchrodingersBot.Services.Encx;
-using SchrodingersBot.Daemons;
+using SchrodingersBot.Services.Web;
 
 namespace SchrodingersBot
 {
@@ -39,7 +39,7 @@ namespace SchrodingersBot
                 {
                     SourceName = "Morado.TG",
                     LogName = "SchrodingersBot"
-                });
+                }); //todo: Does not work.
 
                 log.AddProvider(new BotLoggerProvider());
             });
@@ -75,21 +75,21 @@ namespace SchrodingersBot
 
             //Main bot
             services.AddHostedService<GolfBot>();
-            
 
             //Daemons
-            //services.AddSingleton<EncxGameUpdateDaemon>();
-            //services.AddHostedService<BackgroundServiceStarter<EncxGameUpdateDaemon>>();
+            //services.AddSingleton<TodoOneMinuteDaemon>();
+            //services.AddHostedService<BackgroundServiceStarter<TodoOneMinuteDaemon>>();
 
-
-
+            
+            
             //Services
             services.AddScoped(typeof(ICoordinatesProcessingService), typeof(CoordinatesProcessingService));
             services.AddScoped(typeof(ITextProcessingService), typeof(TextProcessingService));
             services.AddScoped(typeof(IAreasService), typeof(AreasService));
-            services.AddScoped<IEncxService, EncxService>();
             services.AddScoped<IGameService, GameService>();
-            services.AddScoped<IWebHelperService, WebHelperService>();
+            //services.AddScoped<IWebHelperService, WebHelperService>();
+            services.AddSingleton<BrowserPool>();
+            services.AddScoped<IEncxEngine, EncxEngine>();
             
         }
 

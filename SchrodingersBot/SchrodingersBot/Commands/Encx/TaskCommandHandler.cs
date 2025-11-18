@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using HtmlAgilityPack;
 using NotABot.Wrapper;
 using SchrodingersBot.DB.DBO;
 using SchrodingersBot.DB.Repositories;
@@ -6,6 +7,7 @@ using SchrodingersBot.DTO.EnGame;
 using SchrodingersBot.Services.Encx;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -17,18 +19,21 @@ namespace SchrodingersBot.Commands
     public class TaskCommandHandler : IBotCommandHandler<taskCommand>
     {
         private readonly IDbRepository<EncxGameSubscriptionEntity> _gameSubscriptionRepository;
-        private readonly IDbRepository<EncxLoginInfoEntity> _loginInfoRepository;
-        private readonly IEncxService _encxService;
+        private readonly IDbRepository<EncxAuthEntity> _loginInfoRepository;
+        private readonly IEncxEngine _engine;
+        private readonly IGameService _gameService;
         private readonly IMapper _mapper;
 
         public TaskCommandHandler(IDbRepository<EncxGameSubscriptionEntity> gameSubscriptionRepository,
-            IDbRepository<EncxLoginInfoEntity> loginInfoRepository,
-            IEncxService encxService,
+            IDbRepository<EncxAuthEntity> loginInfoRepository,
+            IEncxEngine engine,
+            IGameService gameService,
             IMapper mapper)
         {
+            _gameService = gameService;
+            _engine = engine;
             _gameSubscriptionRepository = gameSubscriptionRepository;
             _loginInfoRepository = loginInfoRepository;
-            _encxService = encxService;
             _mapper = mapper;
         }
 
@@ -48,45 +53,20 @@ namespace SchrodingersBot.Commands
                 return null;
             }
             var loginInfoEntity = await _loginInfoRepository.GetByIdAsync(activeGame.LoginInfoId.Value);
-            var loginInfo = _mapper.Map<LoginInfoDTO>(loginInfoEntity);
 
-            var game = await _encxService.GetGameAsync(request.Message.ChatId, activeGame.Domain, activeGame.GameId, loginInfo);
-            var lvl = game.Level;
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine($"Уровень {lvl.Number}/{game.Levels.Count} {lvl.Name}");
-            if (lvl.Bonuses != null && lvl.Bonuses.Any())
-            {
-                sb.AppendLine($"На уровне бонусы. ({lvl.Bonuses.Count})");
-                foreach(var bonus in lvl.Bonuses.OrderBy(x => x.Number))
-                {
-                    sb.AppendLine($"{bonus.Number}: {bonus.Name} ({(bonus.Negative ? "-" : "")}{bonus.AwardTime}с)");
-                    if (!String.IsNullOrWhiteSpace(bonus.Task))
-                    {
-                        sb.AppendLine(bonus.Task);
-                    }
-                    
-                }
-            }
-            sb.AppendLine($"Секторов для закрытия:{lvl.RequiredSectorsCount}");
-            if (lvl.Sectors != null)
-            {
-                foreach (var sector in lvl.Sectors.OrderBy(x => x.Order))
-                {
-                    sb.AppendLine($"{sector.Order}: {sector.Name} ({sector.Answer})"); //todo
-                }
-            }
+            loginInfoEntity.Domain = activeGame.Domain;
+            loginInfoEntity.GameId = activeGame.GameId;
 
-            result.Add(Answer.SimpleText(request.Message, sb.ToString()));
+            //var game = await _encxService.GetGameAsync(request.Message.ChatId, activeGame.Domain, activeGame.GameId, loginInfo);
+
+            var game = await _engine.GetGameObject(loginInfoEntity);
+
+            if (game is null)
+            {
+                return null;
+            }
             
-            sb = new StringBuilder();
-            if (lvl.Task != null)
-            {
-                sb.AppendLine($"Задание:");
-                sb.AppendLine(lvl.Task.TaskText);
-                result.Add(Answer.SimpleText(request.Message, sb.ToString()));
-            }
-
-            return result;
+            return await _gameService.FormatGameState(request.Message, game, true);
         }
     }
 }

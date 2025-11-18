@@ -15,14 +15,18 @@ namespace SchrodingersBot.Commands
 {
     public class StartGameCommandHandler : IBotCommandHandler<startgameCommand>
     {
-        private readonly IEncxService _encxService;
         private readonly IDbRepository<EncxGameSubscriptionEntity> _gameSubscriptionsRepository;
+        private readonly IDbRepository<EncxAuthEntity> _authRepository;
+        private readonly IEncxEngine _engine;
 
-        public StartGameCommandHandler(IEncxService encxService,
-            IDbRepository<EncxGameSubscriptionEntity> gameSubscriptionsRepository)
+        public StartGameCommandHandler(
+            IDbRepository<EncxGameSubscriptionEntity> gameSubscriptionsRepository,
+            IDbRepository<EncxAuthEntity> authRepository,
+            IEncxEngine engine)
         {
-            _encxService = encxService;
             _gameSubscriptionsRepository = gameSubscriptionsRepository;
+            _engine = engine;
+            _authRepository = authRepository;
         }
 
         public async Task<Result> Handle(startgameCommand request, CancellationToken cancellationToken)
@@ -37,60 +41,57 @@ namespace SchrodingersBot.Commands
                 return null;
             }
 
-            LoginInfoDTO loginInfo = null;
+            EncxAuthEntity? loginInfo = new();
             string url;
-            string domain = null;
-            string gameId = null;
 
             url = request.Message.Parameters[0];
             var uri = new Uri(url);
-            domain = uri.Host;
+            loginInfo.Domain = uri.Host;
 
             if (!String.IsNullOrWhiteSpace(uri.Query))
             {
-                gameId = uri.Query.Split(new char[] { '&', '?' }, StringSplitOptions.RemoveEmptyEntries).Select(x => x.Split('=')).Where(x => x[0].ToLower() == "gid").First()[1];
+                loginInfo.GameId = uri.Query.Split(new char[] { '&', '?' }, StringSplitOptions.RemoveEmptyEntries).Select(x => x.Split('=')).Where(x => x[0].ToLower() == "gid").First()[1];
             }
 
-            if (string.IsNullOrEmpty(domain) || string.IsNullOrEmpty(gameId))
+            if (string.IsNullOrEmpty(loginInfo.Domain) || string.IsNullOrEmpty(loginInfo.GameId))
             {
                 return null;
             }
 
             switch (request.Message.Parameters.Count)
             {
-                case 0:
-                    return null;
-                case 1:
-                    // Start game without login
-                    loginInfo = await _encxService.GetLoginInfo(request.Message.ChatId, domain);
-                    //todo
-                    break;
-                case 2:
-                    // Start game with known user
-                    loginInfo = await _encxService.GetLoginInfo(request.Message.ChatId, domain, request.Message.Parameters[1]);
-                    break;
                 case 3:
                     // Start game with user/pass
-                    loginInfo = await _encxService.GetLoginInfo(request.Message.ChatId, domain, request.Message.Parameters[1], request.Message.Parameters[2]);
+                    //loginInfo = await _encxService.GetLoginInfo(request.Message.ChatId, domain, gameId, , request.Message.Parameters[2]);
+                    loginInfo.Username = request.Message.Parameters[1];
+                    loginInfo.Password = request.Message.Parameters[2];
+                    loginInfo = await _engine.Login(loginInfo);
                     break;
+                default:
+                    return null;
             }
 
-            if (loginInfo is null)
+            if (String.IsNullOrEmpty(loginInfo?.BrowserCookiesJson))
             {
                 return null;
             }
+            else
+            {
+                await _authRepository.CreateAsync(loginInfo);
+            }
 
-            var gameInfo = await _encxService.GetGameAsync(request.Message.ChatId, url, loginInfo);
+            var gameState = await _engine.GetGameObject(loginInfo);
+            //var gameInfo = await _encxService.GetGameAsync(request.Message.ChatId, url, loginInfo);
 
             var gameSubEntity = new EncxGameSubscriptionEntity()
             {
                 ChatId = request.Message.ChatId,
-                Domain = domain,
-                GameId = gameId,
+                Domain = loginInfo.Domain,
+                GameId = loginInfo.GameId,
                 LoginInfoId = loginInfo.Id,
                 IsActive = true,
-                ActiveLevelId = gameInfo?.Level?.LevelId ?? 0,
-                ActiveLevelNumber = gameInfo?.Level?.Number ?? 0,
+                ActiveLevelId = gameState?.Level?.LevelId ?? 0,
+                ActiveLevelNumber = gameState?.Level?.Number ?? 0,
             };
 
             await _gameSubscriptionsRepository.CreateAsync(gameSubEntity);
@@ -101,7 +102,7 @@ namespace SchrodingersBot.Commands
                 new()
                 {
                     ChatId = request.Message.ChatId,
-                    Text = (gameInfo is null) ? "Something went wrong" : $"{gameInfo.GameId}",
+                    Text = (gameState is null) ? "Something went wrong" : $"{gameState.GameId}",
                     AnswerType = AnswerTypes.Text,
                     IsHtml = false
                 }
