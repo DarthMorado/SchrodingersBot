@@ -33,6 +33,7 @@ SchrodingersBot
 
 # Known Problems:
 [ ] Screenshot can cut page and show only part   
+[ ] Not allowed symbols / html throws when trying to send text message   
 
 # BackLog:
 [ ] /askai with reply to comment   
