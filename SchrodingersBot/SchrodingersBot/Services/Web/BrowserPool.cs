@@ -24,6 +24,11 @@ namespace SchrodingersBot.Services.Web
                 }
             }
 
+            if (!_browsers.Any())
+            {
+                await new BrowserFetcher().DownloadAsync();
+            }
+
             // Otherwise create a new one
             var browser = await Puppeteer.LaunchAsync(new LaunchOptions
             {
