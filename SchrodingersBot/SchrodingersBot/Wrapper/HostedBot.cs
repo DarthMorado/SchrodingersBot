@@ -20,6 +20,8 @@ namespace NotABot.Wrapper
     public abstract class HostedBot<T> : IHostedBot<T>
        where T : BotOptions, new()
     {
+        private const int _MessageMaxLength = 4000;
+
         private CancellationTokenSource _cancellationToken;
         private readonly IMediator _mediator;
         private readonly TelegramBotClient _bot;
@@ -69,13 +71,34 @@ namespace NotABot.Wrapper
 
                         if (answer.AnswerType == Answer.AnswerTypes.Text)
                         {
-                            await _bot.SendMessage(chatId: update.Message.Chat.Id,
-                                linkPreviewOptions: new LinkPreviewOptions() { IsDisabled = answer.DisableWebPagePreview },
-                                parseMode: answer.IsHtml ? ParseMode.Html : ParseMode.MarkdownV2,
-                                text: answer.Text.ToString(CultureInfo.CreateSpecificCulture("en-GB")),
-                                replyParameters: answer.ReplyToMessageId.HasValue ? new ReplyParameters() { MessageId = answer.ReplyToMessageId.Value } : null,
-                                cancellationToken: new CancellationTokenSource(1000).Token
-                                );
+                            if (answer.Text.Length > _MessageMaxLength)
+                            {
+                                var answersCount = answer.Text.Length / _MessageMaxLength;
+                                var text = answer.Text;
+                                for (int i = 0; i < answersCount; i++)
+                                {
+                                    answer.Text = $"{i}/{answersCount}\r\n{text.Substring(i * _MessageMaxLength, _MessageMaxLength)}";
+                                    await _bot.SendMessage(chatId: update.Message.Chat.Id,
+                                    linkPreviewOptions: new LinkPreviewOptions() { IsDisabled = answer.DisableWebPagePreview },
+                                    parseMode: answer.IsHtml ? ParseMode.Html : ParseMode.MarkdownV2,
+                                    text: answer.Text.ToString(CultureInfo.CreateSpecificCulture("en-GB")),
+                                    replyParameters: answer.ReplyToMessageId.HasValue ? new ReplyParameters() { MessageId = answer.ReplyToMessageId.Value } : null,
+                                    cancellationToken: new CancellationTokenSource(1000).Token
+                                    );
+                                }
+                            }
+                            else
+                            {
+                                await _bot.SendMessage(chatId: update.Message.Chat.Id,
+                                    linkPreviewOptions: new LinkPreviewOptions() { IsDisabled = answer.DisableWebPagePreview },
+                                    parseMode: answer.IsHtml ? ParseMode.Html : ParseMode.MarkdownV2,
+                                    text: answer.Text.ToString(CultureInfo.CreateSpecificCulture("en-GB")),
+                                    replyParameters: answer.ReplyToMessageId.HasValue ? new ReplyParameters() { MessageId = answer.ReplyToMessageId.Value } : null,
+                                    cancellationToken: new CancellationTokenSource(1000).Token
+                                    );
+                            }
+
+                                
                         }
                         if (answer.AnswerType == Answer.AnswerTypes.Reaction)
                         {

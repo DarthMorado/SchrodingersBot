@@ -11,6 +11,7 @@ using SchrodingersBot.Services.Web;
 using SchrodingersBot.DTO.Encx;
 using System.Text.Encodings.Web;
 using System.Web;
+using System.Diagnostics;
 
 namespace SchrodingersBot.Services.Encx
 {
@@ -155,16 +156,39 @@ namespace SchrodingersBot.Services.Encx
             var browserKey = _BrowserKey(loginInfo.Id);
             var page = await _browserPool.GetOrCreateAsync(browserKey);
 
+
             await page.GoToAsync(_GameUrl(loginInfo.Domain, loginInfo.GameId), new NavigationOptions
             {
-                WaitUntil = new[] { WaitUntilNavigation.Load }
+                WaitUntil = new[] { WaitUntilNavigation.Networkidle0 },
+
             });
+
+            await page.EvaluateExpressionAsync(@"
+    document.body.style.overflow = 'visible';
+    document.documentElement.style.overflow = 'visible';
+    document.body.style.height = 'auto';
+    document.documentElement.style.height = 'auto';
+");
+
+            await page.EvaluateFunctionAsync(@"async () => {
+    await new Promise(resolve => {
+        const distance = 400;
+        const timer = setInterval(() => {
+            window.scrollBy(0, distance);
+            if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight) {
+                clearInterval(timer);
+                resolve();
+            }
+        }, 100);
+    });
+}");
+
+
+
 
             var screenshotOptions = new ScreenshotOptions
             {
                 FullPage = true,
-                CaptureBeyondViewport = true,
-                OptimizeForSpeed = true,
                 Type = ScreenshotType.Png
             };
 

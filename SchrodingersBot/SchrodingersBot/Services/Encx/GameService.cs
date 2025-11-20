@@ -89,7 +89,7 @@ namespace SchrodingersBot.Services.Encx
                 }
                 if (sb.Length > 0)
                 {
-                    result.Add(Answer.SimpleText(message, sb.ToString(), true));
+                    result.Add(Answer.SimpleText(message, sb.ToString(), false));
                 }
             }
 
