@@ -28,6 +28,7 @@ namespace SchrodingersBot.DTO.Encx
         public EncxLevel Level { get; set; }
         //список всех уровней
         public List<EncxLevel> Levels { get; set; }
+
         //время старта игры в UTC
         public string GameDateTimeStart { get; set; }
         //логин игрока

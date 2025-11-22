@@ -52,6 +52,17 @@ namespace SchrodingersBot.Commands
             {
                 loginInfo.GameId = uri.Query.Split(new char[] { '&', '?' }, StringSplitOptions.RemoveEmptyEntries).Select(x => x.Split('=')).Where(x => x[0].ToLower() == "gid").First()[1];
             }
+            else if (uri.Segments.Any(x => x.ToLower() == "play/"))
+            {
+                var gameIdStr = uri.Segments.SkipWhile(x => x.ToLower() != "play/").Skip(1).FirstOrDefault().Trim('\\').Trim('/');
+                if (!String.IsNullOrEmpty(gameIdStr))
+                {
+                    if (int.TryParse(gameIdStr, out _))
+                    {
+                        loginInfo.GameId = gameIdStr;
+                    }
+                }
+            }
 
             if (string.IsNullOrEmpty(loginInfo.Domain) || string.IsNullOrEmpty(loginInfo.GameId))
             {

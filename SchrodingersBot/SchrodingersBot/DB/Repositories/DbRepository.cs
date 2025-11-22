@@ -62,7 +62,7 @@ namespace SchrodingersBot.DB.Repositories
         // Optional: more control
         public virtual async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate)
         {
-            return await _dbSet.AnyAsync(predicate);
+            return await _dbSet.AsNoTracking().AnyAsync(predicate);
         }
     }
 }

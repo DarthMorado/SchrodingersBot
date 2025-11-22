@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Telegram.Bot.Types;
 
 namespace SchrodingersBot.Commands
 {
@@ -22,7 +23,7 @@ namespace SchrodingersBot.Commands
             IDbRepository<EncxGameSubscriptionEntity> subscriptionsRepository
             )
         {
-            _subscriptionsRepository = subscriptionsRepository; 
+            _subscriptionsRepository = subscriptionsRepository;
             _gameService = gameService;
             _encxEngine = encxEngine;
         }
@@ -40,18 +41,32 @@ namespace SchrodingersBot.Commands
 
             var gameState = await _encxEngine.EnterCode(game.LoginInfo, game.ActiveLevelId, game.ActiveLevelNumber, request.Message.Parameter);
 
-            isCorrect = gameState?.EngineAction?.LevelAction?.IsCorrectAnswer ??
-                        gameState?.EngineAction?.BonusAction?.IsCorrectAnswer;
+            Answer.ReactionType resultType = Answer.ReactionType.Unknown;
 
-            var result = Result.Reaction(request.Message, isCorrect switch
+            if (!string.IsNullOrEmpty(gameState?.EngineAction?.LevelAction?.Answer))
             {
-                true => Answer.ReactionType.Heart,
-                false => Answer.ReactionType.Shit,
-                _ => Answer.ReactionType.Unknown
-            });
+                isCorrect = gameState?.EngineAction?.LevelAction?.IsCorrectAnswer ?? false;
+                resultType = isCorrect switch
+                {
+                    true => Answer.ReactionType.Heart,
+                    false => Answer.ReactionType.Shit,
+                };
+            }
+            else if (!string.IsNullOrEmpty(gameState?.EngineAction?.BonusAction?.Answer))
+            {
+                isCorrect = gameState?.EngineAction?.BonusAction?.IsCorrectAnswer ?? false;
+                resultType = isCorrect switch
+                {
+                    true => Answer.ReactionType.Celebration,
+                    false => Answer.ReactionType.Shit,
+                };
+            }
+
+            var result = Result.Reaction(request.Message, resultType);
 
             if (gameState.Level.LevelId != game.ActiveLevelId)
             {
+                game = await _subscriptionsRepository.GetByIdAsync(game.Id);
                 game.ActiveLevelId = gameState.Level.LevelId;
                 game.ActiveLevelNumber = gameState.Level.Number;
                 await _subscriptionsRepository.UpdateAsync(game);

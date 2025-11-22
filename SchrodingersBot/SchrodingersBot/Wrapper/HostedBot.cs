@@ -67,56 +67,63 @@ namespace NotABot.Wrapper
                     var answers = (List<Answer>)a;
                     foreach (var answer in answers)
                     {
-                        PrepareAnswer(answer);
-
-                        if (answer.AnswerType == Answer.AnswerTypes.Text)
+                        try
                         {
-                            if (answer.Text.Length > _MessageMaxLength)
+                            PrepareAnswer(answer);
+
+                            if (answer.AnswerType == Answer.AnswerTypes.Text)
                             {
-                                var answersCount = answer.Text.Length / _MessageMaxLength;
-                                var text = answer.Text;
-                                for (int i = 0; i < answersCount; i++)
+                                if (answer.Text.Length > _MessageMaxLength)
                                 {
-                                    answer.Text = $"{i}/{answersCount}\r\n{text.Substring(i * _MessageMaxLength, _MessageMaxLength)}";
-                                    await _bot.SendMessage(chatId: update.Message.Chat.Id,
-                                    linkPreviewOptions: new LinkPreviewOptions() { IsDisabled = answer.DisableWebPagePreview },
-                                    parseMode: answer.IsHtml ? ParseMode.Html : ParseMode.MarkdownV2,
-                                    text: answer.Text.ToString(CultureInfo.CreateSpecificCulture("en-GB")),
-                                    replyParameters: answer.ReplyToMessageId.HasValue ? new ReplyParameters() { MessageId = answer.ReplyToMessageId.Value } : null,
-                                    cancellationToken: new CancellationTokenSource(1000).Token
-                                    );
+                                    var answersCount = answer.Text.Length / _MessageMaxLength;
+                                    var text = answer.Text;
+                                    for (int i = 0; i < answersCount; i++)
+                                    {
+                                        answer.Text = $"{i}/{answersCount}\r\n{text.Substring(i * _MessageMaxLength, _MessageMaxLength)}";
+                                        await _bot.SendMessage(chatId: update.Message.Chat.Id,
+                                        linkPreviewOptions: new LinkPreviewOptions() { IsDisabled = answer.DisableWebPagePreview },
+                                        parseMode: answer.IsHtml ? ParseMode.Html : ParseMode.MarkdownV2,
+                                        text: answer.Text.ToString(CultureInfo.CreateSpecificCulture("en-GB")),
+                                        replyParameters: answer.ReplyToMessageId.HasValue ? new ReplyParameters() { MessageId = answer.ReplyToMessageId.Value } : null,
+                                        cancellationToken: new CancellationTokenSource(1000).Token
+                                        );
+                                    }
                                 }
-                            }
-                            else
-                            {
-                                await _bot.SendMessage(chatId: update.Message.Chat.Id,
-                                    linkPreviewOptions: new LinkPreviewOptions() { IsDisabled = answer.DisableWebPagePreview },
-                                    parseMode: answer.IsHtml ? ParseMode.Html : ParseMode.MarkdownV2,
-                                    text: answer.Text.ToString(CultureInfo.CreateSpecificCulture("en-GB")),
-                                    replyParameters: answer.ReplyToMessageId.HasValue ? new ReplyParameters() { MessageId = answer.ReplyToMessageId.Value } : null,
-                                    cancellationToken: new CancellationTokenSource(1000).Token
-                                    );
-                            }
-
-                                
-                        }
-                        if (answer.AnswerType == Answer.AnswerTypes.Reaction)
-                        {
-                            await _bot.SetMessageReaction(chatId: update.Message.Chat.Id,
-                                messageId: answer.ReplyToMessageId.Value,
-                                reaction: new List<ReactionTypeEmoji>()
+                                else
                                 {
+                                    await _bot.SendMessage(chatId: update.Message.Chat.Id,
+                                        linkPreviewOptions: new LinkPreviewOptions() { IsDisabled = answer.DisableWebPagePreview },
+                                        parseMode: answer.IsHtml ? ParseMode.Html : ParseMode.MarkdownV2,
+                                        text: answer.Text.ToString(CultureInfo.CreateSpecificCulture("en-GB")),
+                                        replyParameters: answer.ReplyToMessageId.HasValue ? new ReplyParameters() { MessageId = answer.ReplyToMessageId.Value } : null,
+                                        cancellationToken: new CancellationTokenSource(1000).Token
+                                        );
+                                }
+
+
+                            }
+                            if (answer.AnswerType == Answer.AnswerTypes.Reaction)
+                            {
+                                await _bot.SetMessageReaction(chatId: update.Message.Chat.Id,
+                                    messageId: answer.ReplyToMessageId.Value,
+                                    reaction: new List<ReactionTypeEmoji>()
+                                    {
                                     new ()
                                     {
                                         Emoji = answer.Text
                                     }
-                                }
-                                );
+                                    }
+                                    );
+                            }
+                            if (answer.AnswerType == Answer.AnswerTypes.Image)
+                            {
+                                using var ms = new MemoryStream(answer.Content);
+                                await _bot.SendPhoto(chatId: update.Message.Chat.Id, new InputFileStream(ms, answer.Text));
+                            }
                         }
-                        if (answer.AnswerType == Answer.AnswerTypes.Image)
+                        catch(Exception ex)
                         {
-                            using var ms = new MemoryStream(answer.Content);
-                            await _bot.SendPhoto(chatId: update.Message.Chat.Id, new InputFileStream(ms, answer.Text));
+                            await ProcessUnexpectedErrorAsync(ex);
                         }
                     }
                 }

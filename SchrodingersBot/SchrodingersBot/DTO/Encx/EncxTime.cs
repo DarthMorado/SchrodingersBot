@@ -8,9 +8,9 @@ namespace SchrodingersBot.DTO.Encx
 {
     public class EncxTime
     {
-        public long Value { get; set; }
-        public long Timestamp { get; set; }
+        public double Value { get; set; }
+        public double Timestamp { get; set; }
 
-        public DateTime Date => new DateTime(Timestamp);
+        //public DateTime Date => new DateTime(Timestamp);
     }
 }
