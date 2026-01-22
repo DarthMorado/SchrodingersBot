@@ -1,19 +1,20 @@
-﻿using MediatR;
+﻿using HtmlAgilityPack;
+using MediatR;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
+using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Encodings.Web;
+using System.Threading;
 using System.Threading.Tasks;
-using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
-using System.Threading;
-using System.Globalization;
-using System.Reflection.Metadata.Ecma335;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using static System.Net.Mime.MediaTypeNames;
-using System.Text.Encodings.Web;
-using System.Runtime.CompilerServices;
 
 namespace NotABot.Wrapper
 {
@@ -201,6 +202,80 @@ namespace NotABot.Wrapper
                 {
                     input.Text = input.Text.Replace(specialSymbol, $"\\{specialSymbol}");
                 }
+            }
+
+            if (input.IsHtml)
+            {
+                //input.Text = input.Text.Replace("&lt;br&gt;", "\r\n")
+                //    //.Replace("<del>","")
+                //    ;
+
+                //StringBuilder sb = new();
+
+
+                //foreach(var allowedTag in allowedTags)
+                //{
+                //    input.Text = input.Text.Replace($"&lt;{allowedTag.tag}&gt;", $"<{allowedTag.output}>")
+                //        .Replace($"&lt;/{allowedTag.tag}&gt;", $"</{allowedTag.output}>");
+                //}
+                var doc = new HtmlDocument
+                {
+                    OptionFixNestedTags = true
+                };
+                doc.LoadHtml($"{input.Text}");
+
+                ProcessHtmlNode(doc.DocumentNode);
+
+                input.Text = doc.DocumentNode.InnerHtml;
+            }
+        }
+
+        private static void ProcessHtmlNode(HtmlNode node)
+        {
+            List<string> BannedTags = new List<string>()
+            {
+                "style",
+                "script"
+            };
+
+            List<string> AllowedTags = new List<string>()
+            {
+                "i",
+                "b",
+                "strong",
+                "em",
+                "u",
+                "ins",
+                "s",
+                "del",
+                "pre"
+            };
+
+            //Links: <a href = "https://example.com" > text </ a >
+            //Mentions by user id: <a href = "tg://user?id=123456789" > name </ a >
+
+            var children = node.ChildNodes.ToList();
+            foreach (var child in children)
+            {
+                ProcessHtmlNode(child);
+            }
+
+            if (node.ParentNode != null && node.NodeType == HtmlNodeType.Element)
+            {
+                if (BannedTags.Contains(node.Name))
+                {
+                    node.ParentNode.RemoveChild(node);
+                }
+                else if (!AllowedTags.Contains(node.Name))
+                {
+                    node.ParentNode.ReplaceChild(
+                            HtmlNode.CreateNode(node.InnerHtml),
+                            node);
+                }
+                //if (node.Attributes.Any())
+                //{
+                //    node.Attributes.RemoveAll();
+                //}
             }
         }
     }

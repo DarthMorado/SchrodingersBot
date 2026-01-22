@@ -210,7 +210,8 @@ namespace SchrodingersBot.Services.Encx
 
                 foreach(var task in tasks)
                 {
-                    sb.AppendLine(EscapeHtml(task.TaskText, out _));
+                    //sb.AppendLine(EscapeHtml(task.TaskText, out _));
+                    sb.AppendLine(task.TaskText);
                 }
 
                 return sb.ToString();

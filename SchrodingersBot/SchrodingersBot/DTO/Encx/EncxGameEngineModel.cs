@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Telegram.Bot.Types;
 
 namespace SchrodingersBot.DTO.Encx
 {
@@ -31,6 +32,22 @@ namespace SchrodingersBot.DTO.Encx
 
         //время старта игры в UTC
         public string GameDateTimeStart { get; set; }
+        public DateTime? GameDateTimeStartReal
+        {
+            get
+            {
+                long offsetValue;
+                if (String.IsNullOrEmpty(GameDateTimeStart) || !long.TryParse(GameDateTimeStart, out offsetValue))
+                {
+                    return null;
+                }
+                DateTime utcDate = DateTimeOffset.FromUnixTimeSeconds(long.Parse(GameDateTimeStart)).UtcDateTime;
+                return utcDate;
+
+                //DateTime localTime = TimeZoneInfo.ConvertTimeFromUtc(utcDate, TimeZoneInfo.Local);
+                //return localTime;
+            }
+        }
         //логин игрока
         public string Login { get; set; }
         //имя команды
