@@ -119,7 +119,7 @@ namespace NotABot.Wrapper
                             if (answer.AnswerType == Answer.AnswerTypes.Image)
                             {
                                 using var ms = new MemoryStream(answer.Content);
-                                await _bot.SendPhoto(chatId: update.Message.Chat.Id, new InputFileStream(ms, answer.Text));
+                                await _bot.SendPhoto(chatId: update.Message.Chat.Id, new InputFileStream(ms, answer.Text), answer.Text);
                             }
                         }
                         catch(Exception ex)
@@ -169,8 +169,10 @@ namespace NotABot.Wrapper
             Console.WriteLine(exception);
         }
 
-        private void PrepareAnswer(Answer input)
+        private List<Answer> PrepareAnswer(Answer input)
         {
+            var additionalAnswers = new List<Answer>();
+
             var specialSymbols = new List<string>()
             {
                 "\\",
@@ -196,7 +198,7 @@ namespace NotABot.Wrapper
                 "!"
             };
 
-            if (!input.IsHtml && !String.IsNullOrWhiteSpace(input.Text))
+            if (!input.IsHtml && !String.IsNullOrWhiteSpace(input.Text) && input.AnswerType == Answer.AnswerTypes.Text)
             {
                 foreach (string specialSymbol in specialSymbols)
                 {
@@ -224,14 +226,18 @@ namespace NotABot.Wrapper
                 };
                 doc.LoadHtml($"{input.Text}");
 
-                ProcessHtmlNode(doc.DocumentNode);
+                additionalAnswers.AddRange(ProcessHtmlNode(doc.DocumentNode));
 
                 input.Text = doc.DocumentNode.InnerHtml;
             }
+
+            return additionalAnswers;
         }
 
-        private static void ProcessHtmlNode(HtmlNode node)
+        private static List<Answer> ProcessHtmlNode(HtmlNode node)
         {
+            var additionalAnswers = new List<Answer>();
+
             List<string> BannedTags = new List<string>()
             {
                 "style",
@@ -248,7 +254,8 @@ namespace NotABot.Wrapper
                 "ins",
                 "s",
                 "del",
-                "pre"
+                "pre",
+                "a"
             };
 
             //Links: <a href = "https://example.com" > text </ a >
@@ -268,15 +275,30 @@ namespace NotABot.Wrapper
                 }
                 else if (!AllowedTags.Contains(node.Name))
                 {
-                    node.ParentNode.ReplaceChild(
+                    switch(node.Name.ToLower())
+                    {
+                        //case "img":
+                        //    var imganswer = Answer.
+                        //    additionalAnswers.Add()
+                        //    break;
+                        //case "a":
+                        //    break;
+                        default:
+                            node.ParentNode.ReplaceChild(
                             HtmlNode.CreateNode(node.InnerHtml),
                             node);
+                            break;
+                    }
+                    
+                    
                 }
                 //if (node.Attributes.Any())
                 //{
                 //    node.Attributes.RemoveAll();
                 //}
             }
+
+            return additionalAnswers;
         }
     }
 }

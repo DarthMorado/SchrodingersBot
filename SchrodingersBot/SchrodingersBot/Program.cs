@@ -80,8 +80,7 @@ namespace SchrodingersBot
             //services.AddSingleton<TodoOneMinuteDaemon>();
             //services.AddHostedService<BackgroundServiceStarter<TodoOneMinuteDaemon>>();
 
-            
-            
+
             //Services
             services.AddScoped(typeof(ICoordinatesProcessingService), typeof(CoordinatesProcessingService));
             services.AddScoped(typeof(ITextProcessingService), typeof(TextProcessingService));
@@ -90,7 +89,7 @@ namespace SchrodingersBot
             //services.AddScoped<IWebHelperService, WebHelperService>();
             services.AddSingleton<BrowserPool>();
             services.AddScoped<IEncxEngine, EncxEngine>();
-            
+            services.AddScoped<IHtmlProcessingService, HtmlProcessingService>();
         }
 
         public static void ConfigureDatabase(IServiceCollection services, IConfiguration config)

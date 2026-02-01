@@ -9,8 +9,10 @@ using PuppeteerSharp;
 using SchrodingersBot.Commands;
 using SchrodingersBot.DB.DBO;
 using SchrodingersBot.DB.Repositories;
+using SchrodingersBot.DTO;
 using SchrodingersBot.DTO.Encx;
 using SchrodingersBot.DTO.EnGame;
+using SchrodingersBot.Services.Text;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -26,13 +28,16 @@ namespace SchrodingersBot.Services.Encx
         private readonly IDbRepository<EncxAuthEntity> _loginInfoRepository;
         private readonly IMapper _mapper;
         private readonly IMediator _mediator;
+        private readonly IHtmlProcessingService _htmlProcessingService;
 
         public GameService(IDbRepository<EncxGameSubscriptionEntity> gameSubscriptionRepository,
             IDbRepository<EncxAuthEntity> loginInfoRepository,
             IMapper mapper,
-            IMediator mediator
+            IMediator mediator,
+            IHtmlProcessingService htmlProcessingService
             )
         {
+            _htmlProcessingService = htmlProcessingService;
             _mediator = mediator;
             _gameSubscriptionRepository = gameSubscriptionRepository;
             _loginInfoRepository = loginInfoRepository;
@@ -43,61 +48,35 @@ namespace SchrodingersBot.Services.Encx
         {
             Result result = new();
 
+            var additionalObjects = new List<MessageObjectDTO>();
+            var newAdditionalObjects = new List<MessageObjectDTO>();
+
             var lvl = game.Level;
             if (lvl is null) return result;
 
             StringBuilder sb = new StringBuilder();
             sb.AppendLine(FormatLevelHeader(game));
-            sb.AppendLine(FormatLevelTask(game));
+
+            additionalObjects = await FormatLevelTask(game);
+            if (additionalObjects.Any())
+            {
+                sb.AppendLine(additionalObjects[0].Text);
+            }
+            additionalObjects.AddRange(newAdditionalObjects.Skip(1));
+
             sb.AppendLine(FormatLevelHelps(game));
             sb.AppendLine(FormatLevelBonuses(game));
-            //if (lvl.Bonuses != null && lvl.Bonuses.Any())
-            //{
-            //    sb.AppendLine($"На уровне бонусы. ({lvl.Bonuses.Count})");
-            //    foreach (var bonus in lvl.Bonuses.OrderBy(x => x.Number))
-            //    {
-            //        sb.AppendLine($"{bonus.Number}: {bonus.Name} ({(bonus.Negative ? "-" : "")}{bonus.AwardTime}с)");
-            //        if (!String.IsNullOrWhiteSpace(bonus.Task))
-            //        {
-            //            sb.AppendLine(bonus.Task);
-            //        }
-
-            //    }
-            //}
-            //sb.AppendLine($"Секторов для закрытия:{lvl.RequiredSectorsCount}");
-            //if (lvl.Sectors != null)
-            //{
-            //    foreach (var sector in lvl.Sectors.OrderBy(x => x.Order))
-            //    {
-            //        sb.AppendLine($"{sector.Order}: {sector.Name} ({sector.Answer})"); //todo
-            //    }
-            //}
 
             result.Add(Answer.SimpleText(message, sb.ToString(), true));
 
-            //sb = new StringBuilder();
-            //if (lvl.Task != null || lvl.Tasks != null)
-            //{
-            //    sb.AppendLine($"Задание:");
-            //    if (!String.IsNullOrWhiteSpace(lvl?.Task?.TaskText))
-            //    {
-            //        sb.AppendLine(lvl.Task.TaskText);
-            //    }
-            //    foreach (var task in lvl.Tasks ?? new())
-            //    {
-            //        HtmlDocument doc = new HtmlDocument();
-            //        doc.LoadHtml($"<html><body>{task.TaskText}</body></html>");
-            //        var txt = doc.DocumentNode.InnerText.Trim();
-            //        if (!String.IsNullOrWhiteSpace(txt))
-            //        {
-            //            sb.AppendLine(txt);
-            //        }
-            //    }
-            //    if (sb.Length > 0)
-            //    {
-            //        result.Add(Answer.SimpleText(message, sb.ToString(), false));
-            //    }
-            //}
+            foreach (var additionalObject in additionalObjects)
+            {
+                if (additionalObject.IsImage)
+                {
+                    result.Add(Answer.SimpleImage(message, additionalObject.Content, additionalObject.Text));
+                }
+            }
+          
 
             if (needScreenshot)
             {
@@ -187,12 +166,14 @@ namespace SchrodingersBot.Services.Encx
             }
         }
 
-        private string FormatLevelTask(EncxGameEngineModel game)
+        private async Task<List<MessageObjectDTO>> FormatLevelTask(EncxGameEngineModel game)
         {
+            var result = new List<MessageObjectDTO>();
+            var additionalObjects = new List<MessageObjectDTO>();
             try
             {
                 var lvl = game.Level;
-                if (lvl == null) return String.Empty;
+                if (lvl == null) return result;
 
                 List<EncxTask> tasks = new List<EncxTask>();
 
@@ -211,14 +192,25 @@ namespace SchrodingersBot.Services.Encx
                 foreach(var task in tasks)
                 {
                     //sb.AppendLine(EscapeHtml(task.TaskText, out _));
-                    sb.AppendLine(task.TaskText);
+                    var objects = await _htmlProcessingService.PrepareHtmlForTg(task.TaskText);
+                    if (objects.Any())
+                    {
+                        sb.AppendLine(objects[0].Text);
+                        additionalObjects.AddRange(objects.Skip(1));
+                    }
+                    
                 }
 
-                return sb.ToString();
+                result.Add(new MessageObjectDTO()
+                {
+                    Text = sb.ToString(),
+                });
+                result.AddRange(additionalObjects);
+                return result;
             }
             catch
             {
-                return string.Empty;
+                return result;
             }
         }
         private string FormatLevelHelps(EncxGameEngineModel game)
