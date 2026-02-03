@@ -122,7 +122,7 @@ namespace NotABot.Wrapper
                                 await _bot.SendPhoto(chatId: update.Message.Chat.Id, new InputFileStream(ms, answer.Text), answer.Text);
                             }
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             await ProcessUnexpectedErrorAsync(ex);
                         }
@@ -156,7 +156,7 @@ namespace NotABot.Wrapper
 
                 incomingMessage = PrepareIncommingMessageCommandName(incomingMessage);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 await ProcessUnexpectedErrorAsync(ex);
             }
@@ -208,18 +208,6 @@ namespace NotABot.Wrapper
 
             if (input.IsHtml)
             {
-                //input.Text = input.Text.Replace("&lt;br&gt;", "\r\n")
-                //    //.Replace("<del>","")
-                //    ;
-
-                //StringBuilder sb = new();
-
-
-                //foreach(var allowedTag in allowedTags)
-                //{
-                //    input.Text = input.Text.Replace($"&lt;{allowedTag.tag}&gt;", $"<{allowedTag.output}>")
-                //        .Replace($"&lt;/{allowedTag.tag}&gt;", $"</{allowedTag.output}>");
-                //}
                 var doc = new HtmlDocument
                 {
                     OptionFixNestedTags = true
@@ -275,7 +263,7 @@ namespace NotABot.Wrapper
                 }
                 else if (!AllowedTags.Contains(node.Name))
                 {
-                    switch(node.Name.ToLower())
+                    switch (node.Name.ToLower())
                     {
                         //case "img":
                         //    var imganswer = Answer.
@@ -288,14 +276,11 @@ namespace NotABot.Wrapper
                             HtmlNode.CreateNode(node.InnerHtml),
                             node);
                             break;
+                            //todo:fix:ReplaceNodeWithChildren
                     }
-                    
-                    
+
+
                 }
-                //if (node.Attributes.Any())
-                //{
-                //    node.Attributes.RemoveAll();
-                //}
             }
 
             return additionalAnswers;

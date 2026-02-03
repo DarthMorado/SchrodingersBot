@@ -11,7 +11,11 @@ namespace SchrodingersBot.Services.Text
 {
     public interface IHtmlProcessingService
     {
-        Task<List<MessageObjectDTO>> PrepareHtmlForTg(string input);
+        Task<List<MessageObjectDTO>> PrepareHtmlForTgAsync(string input);
+
+        Task<List<MessageObjectDTO>> FinalizeHtmlForTgAsync(string input);
+
+        void ReplaceNodeWithChildren(HtmlNode node);
     }
 
     public class HtmlProcessingService : IHtmlProcessingService
@@ -21,28 +25,35 @@ namespace SchrodingersBot.Services.Text
 
         }
 
-        public async Task<List<MessageObjectDTO>> PrepareHtmlForTg(string input)
+        public async Task<List<MessageObjectDTO>> PrepareHtmlForTgAsync(string input)
         {
             List<MessageObjectDTO> result = new();
-            var doc = new HtmlDocument
+
+            try
             {
-                OptionFixNestedTags = true
-            };
-            doc.LoadHtml($"{input}");
+                var doc = new HtmlDocument
+                {
+                    OptionFixNestedTags = true
+                };
+                doc.LoadHtml($"{input}");
 
-            List<MessageObjectDTO> additionalObjects = await ProcessHtmlNodeAsync(doc.DocumentNode);
+                List<MessageObjectDTO> additionalObjects = await ProcessHtmlNodeAsync(doc.DocumentNode);
 
-            result.Add(new MessageObjectDTO()
+                result.Add(new MessageObjectDTO()
+                {
+                    Text = doc.DocumentNode.InnerHtml
+                });
+
+                result.AddRange(additionalObjects);
+            }
+            catch (Exception ex)
             {
-                Text = doc.DocumentNode.InnerHtml
-            });
 
-            result.AddRange(additionalObjects);
-            
+            }
             return result;
         }
 
-        private static async Task<List<MessageObjectDTO>> ProcessHtmlNodeAsync(HtmlNode node)
+        private async Task<List<MessageObjectDTO>> ProcessHtmlNodeAsync(HtmlNode node)
         {
             var additionalAnswers = new List<MessageObjectDTO>();
 
@@ -112,21 +123,29 @@ namespace SchrodingersBot.Services.Text
                             {
                                 var href = node.Attributes["href"];
 
-                                node.ParentNode.ReplaceChild(
-                                HtmlNode.CreateNode($"<a href=\"{href}\">{node.InnerText}</a>" ),
-                                node);
+                                try
+                                {
+                                    var newNode = HtmlNode.CreateNode($"<a href=\"{href.Value}\">{node.InnerText}</a>");
+
+                                    node.ParentNode.ReplaceChild(
+                                        newNode,
+                                        node);
+                                }
+                                catch (Exception ex)
+                                {
+
+                                }
+
                             }
                             else
                             {
-                                node.ParentNode.ReplaceChild(
-                                HtmlNode.CreateNode(node.InnerHtml),
-                                node);
+                                ReplaceNodeWithChildren(node);
                             }
-                                break;
+                            break;
                         default:
-                            node.ParentNode.ReplaceChild(
-                            HtmlNode.CreateNode(node.InnerHtml),
-                            node);
+                            ReplaceNodeWithChildren(node);
+
+
                             break;
                     }
 
@@ -139,6 +158,29 @@ namespace SchrodingersBot.Services.Text
             }
 
             return additionalAnswers;
+        }
+
+        public void ReplaceNodeWithChildren(HtmlNode node)
+        {
+            if (node is null)
+            {
+                return;
+            }
+            if (node.ParentNode != null)
+            {
+                while (node.ChildNodes.Any())
+                {
+                    var firstBorn = node.ChildNodes.First();
+                    firstBorn.Remove();
+                    node.ParentNode.InsertBefore(firstBorn, node);
+                }
+            }
+            node.Remove();
+        }
+
+        public Task<List<MessageObjectDTO>> FinalizeHtmlForTgAsync(string input)
+        {
+            throw new NotImplementedException();
         }
     }
 }

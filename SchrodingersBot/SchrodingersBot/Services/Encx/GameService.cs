@@ -76,7 +76,7 @@ namespace SchrodingersBot.Services.Encx
                     result.Add(Answer.SimpleImage(message, additionalObject.Content, additionalObject.Text));
                 }
             }
-          
+
 
             if (needScreenshot)
             {
@@ -189,16 +189,16 @@ namespace SchrodingersBot.Services.Encx
                 StringBuilder sb = new();
                 sb.AppendLine("<b>Задание:</b>");
 
-                foreach(var task in tasks)
+                foreach (var task in tasks)
                 {
                     //sb.AppendLine(EscapeHtml(task.TaskText, out _));
-                    var objects = await _htmlProcessingService.PrepareHtmlForTg(task.TaskText);
+                    var objects = await _htmlProcessingService.PrepareHtmlForTgAsync(task.TaskText);
                     if (objects.Any())
                     {
                         sb.AppendLine(objects[0].Text);
                         additionalObjects.AddRange(objects.Skip(1));
                     }
-                    
+
                 }
 
                 result.Add(new MessageObjectDTO()
@@ -240,7 +240,7 @@ namespace SchrodingersBot.Services.Encx
 
                 }
 
-                    return sb.ToString();
+                return sb.ToString();
             }
             catch
             {
