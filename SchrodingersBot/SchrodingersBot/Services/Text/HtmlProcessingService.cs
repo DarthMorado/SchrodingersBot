@@ -178,9 +178,77 @@ namespace SchrodingersBot.Services.Text
             node.Remove();
         }
 
-        public Task<List<MessageObjectDTO>> FinalizeHtmlForTgAsync(string input)
+        public async Task<List<MessageObjectDTO>> FinalizeHtmlForTgAsync(string input)
         {
-            throw new NotImplementedException();
+            List<MessageObjectDTO> result = new();
+
+            try
+            {
+                var doc = new HtmlDocument
+                {
+                    OptionFixNestedTags = true
+                };
+                doc.LoadHtml($"{input}");
+
+                List<MessageObjectDTO> additionalObjects = await FinalizeHtmlNodeAsync(doc.DocumentNode);
+
+                result.Add(new MessageObjectDTO()
+                {
+                    Text = doc.DocumentNode.InnerHtml
+                });
+
+                result.AddRange(additionalObjects);
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return result;
+        }
+
+        private async Task<List<MessageObjectDTO>> FinalizeHtmlNodeAsync(HtmlNode node)
+        {
+            var additionalAnswers = new List<MessageObjectDTO>();
+
+            List<string> BannedTags = new List<string>()
+            {
+                "style",
+                "script"
+            };
+
+            List<string> AllowedTags = new List<string>()
+            {
+                "i",
+                "b",
+                "strong",
+                "em",
+                "u",
+                "ins",
+                "s",
+                "del",
+                "pre",
+                "a"
+            };
+
+            var children = node.ChildNodes.ToList();
+            foreach (var child in children)
+            {
+                additionalAnswers.AddRange(await FinalizeHtmlNodeAsync(child));
+            }
+
+            if (node.ParentNode != null && node.NodeType == HtmlNodeType.Element)
+            {
+                if (BannedTags.Contains(node.Name))
+                {
+                    node.ParentNode.RemoveChild(node);
+                }
+                else if (!AllowedTags.Contains(node.Name))
+                {
+                    ReplaceNodeWithChildren(node);
+                }
+            }
+
+            return additionalAnswers;
         }
     }
 }

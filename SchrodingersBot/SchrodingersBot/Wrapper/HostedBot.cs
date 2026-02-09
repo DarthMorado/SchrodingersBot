@@ -208,6 +208,7 @@ namespace NotABot.Wrapper
 
             if (input.IsHtml)
             {
+
                 var doc = new HtmlDocument
                 {
                     OptionFixNestedTags = true
