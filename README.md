@@ -4,8 +4,8 @@ SchrodingersBot
 # Roadmap
 
 [x] v.1.2 - game/task/codes info  - webbrowser   
-[x] v.1.2.5 - Actual version
-[ ] v.1.2.6 - update help
+[x] v.1.2.5 - Actual version   
+[ ] v.1.2.6 - update help   
 
 [ ] v.1.3 - format hints/bonuses/... + autoupdate   
 [ ] v.1.3.1 - prefix   
@@ -38,12 +38,10 @@ SchrodingersBot
 
 # Known Problems:
 [ ] Screenshot can cut page and show only part   
-[ ] Not allowed symbols / html throws when trying to send text message   
 
 # BackLog:
 [ ] /askai with reply to comment   
 [ ] write logs to TG chat from config   
 [ ] write browser logs : GET/POST logs   
 [ ] IEnumerable + yield   
-[ ] Add prefixes to codes   
 [ ] availability in multiple chats   
