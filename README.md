@@ -3,13 +3,18 @@ SchrodingersBot
 
 # Roadmap
 
-[x] v.0.1 - cords & radius  
-[x] v.0.2 - where runs param + read version number  
-[x] v.0.3 - split command by space and underscore  
-[x] v.1.0 - error handling  
-[x] v.1.1 - game/task/codes info     
-[ ] v.1.2 - game/task/codes info  - webbrowser   
-[ ] v.1.3 - format hints/bonuses/... + autoupdate + awailability in multiple chats   
+[x] v.1.2 - game/task/codes info  - webbrowser   
+[x] v.1.2.5 - Actual version
+[ ] v.1.2.6 - update help
+
+[ ] v.1.3 - format hints/bonuses/... + autoupdate   
+[ ] v.1.3.1 - prefix   
+[ ] v.1.3.2 - format hints   
+[ ] v.1.3.3 - format bonuses. (on .comand XX solved bonus YY: b5 min; result:)   
+[ ] v.1.3.4 - daemon and send hints on time   
+[ ] v.1.3.5 - search for coordinates in tasks/hints/bonuses
+
+[ ] v.1.4 - store game levels / codes / hints / bonuses info locally in DB
    
 [ ] v.1.x - follow users   
 [ ] v.1.y - addresses / KML / OSM  / grauzti   
@@ -41,3 +46,4 @@ SchrodingersBot
 [ ] write browser logs : GET/POST logs   
 [ ] IEnumerable + yield   
 [ ] Add prefixes to codes   
+[ ] availability in multiple chats   
