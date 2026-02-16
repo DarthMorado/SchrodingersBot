@@ -35,6 +35,8 @@ namespace SchrodingersBot.Commands
                 sb.AppendLine($"Run info: {_options.RunInfo}");
             }
 
+            sb.AppendLine($"if lost: /help");
+
             return new()
             {
                 new()
