@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace SchrodingersBot.DB.DBO
 {
-    public class EncxGameSubscriptionEntity : BaseEntity
+    public class EncxGameSubscriptionEntity : ChatEntity
     {
-        public long ChatId { get; set; }
         public EncxAuthEntity LoginInfo { get; set; }
         public int? LoginInfoId { get; set; }
         public string Domain { get; set; }
