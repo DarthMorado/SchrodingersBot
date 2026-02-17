@@ -99,8 +99,7 @@ namespace SchrodingersBot
                 options.UseSqlServer(connectionString));
             //services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped(typeof(IDbRepository<>), typeof(DbRepository<>));
-            
-
+            services.AddScoped(typeof(IDbChatRepository<>), typeof(DbChatRepository<>));
         }
     }
 }
