@@ -10,8 +10,9 @@ SchrodingersBot
 [ ] v.1.3.2 - format hints   
 [ ] v.1.3.3 - format bonuses. (on .comand XX solved bonus YY: b5 min; result:)   
 [ ] v.1.3.4 - daemon and send hints on time   
-[ ] v.1.3.5 - search for coordinates in tasks/hints/bonuses
-[ ] v.1.3.6 - real image links, not guids
+[ ] v.1.3.5 - search for coordinates in tasks/hints/bonuses   
+[ ] v.1.3.6 - real image links, not guids   
+[ ] v.1.3.7 - /joingame, allow one credentials for several chats. disallow them in other chats   
 
 [ ] v.1.4 - store game levels / codes / hints / bonuses info locally in DB
    
@@ -21,7 +22,7 @@ SchrodingersBot
 # Commands:
 [x] without command - search for coordinates (correct links to google/waze/baltic)  
 [x] /start  
-[ ] /help  
+[x] /help  
 [x] /setarea  
 [x] /startgame   
 [x] /game  
@@ -33,7 +34,8 @@ SchrodingersBot
 [ ] /a - address2cords and cords2address  
 [x] /screenshot   
 [ ] /follow - for coordinates format (take latest and add "X km (approx time) for user U")     
-[ ] /setprefix   
+[x] /prefix
+[x] /setprefix   
 
 # Known Problems:
 [ ] Screenshot can cut page and show only part   
@@ -42,5 +44,4 @@ SchrodingersBot
 [ ] /askai with reply to comment   
 [ ] write logs to TG chat from config   
 [ ] write browser logs : GET/POST logs   
-[ ] IEnumerable + yield   
-[ ] availability in multiple chats   
+[ ] IEnumerable + yield     
