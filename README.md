@@ -36,6 +36,7 @@ SchrodingersBot
 [ ] /follow - for coordinates format (take latest and add "X km (approx time) for user U")     
 [x] /prefix
 [x] /setprefix   
+[ ] /sectors (all sectors of current task with names and answers)   
 
 # Known Problems:
 [ ] Screenshot can cut page and show only part   
