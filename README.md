@@ -46,3 +46,4 @@ SchrodingersBot
 [ ] write logs to TG chat from config   
 [ ] write browser logs : GET/POST logs   
 [ ] IEnumerable + yield     
+[ ] Monitor statistics (who completed our lvl etc.)   
