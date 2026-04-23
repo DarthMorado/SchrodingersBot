@@ -17,6 +17,6 @@ namespace SchrodingersBot.DB.DBO
         public int ActiveLevelNumber { get; set; } = 0;
         public bool IsActive { get; set; } = false;
 
-        public IEnumerable<EncxLevelEntity> Levels { get; set; }
+        //public IEnumerable<EncxLevelEntity> Levels { get; set; }
     }
 }

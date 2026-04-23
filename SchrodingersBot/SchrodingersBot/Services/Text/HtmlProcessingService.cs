@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 
 namespace SchrodingersBot.Services.Text
@@ -100,7 +101,7 @@ namespace SchrodingersBot.Services.Text
                             {
                                 var src = node.Attributes["src"].Value;
                                 byte[] content = null;
-                                string Id = Guid.NewGuid().ToString();
+                                //string Id = Guid.NewGuid().ToString();
                                 using (HttpClient client = new HttpClient())
                                 {
                                     content = await client.GetByteArrayAsync(src);
@@ -109,12 +110,14 @@ namespace SchrodingersBot.Services.Text
                                 additionalAnswers.Add(new MessageObjectDTO()
                                 {
                                     Content = content,
-                                    Text = $"[IMG:{Id}]{node.InnerText}",
+                                    //Text = $"[IMG:{Id}]{node.InnerText}",
+                                    Text = $"[IMG:{src}]{node.InnerText}",
                                     IsImage = true
                                 });
 
                                 node.ParentNode.ReplaceChild(
-                                HtmlNode.CreateNode($"[IMG:{Id}]"),
+                                //HtmlNode.CreateNode($"[IMG:{Id}]"),
+                                HtmlNode.CreateNode($"[IMG:{src}]"),
                                 node);
                             }
                             break;

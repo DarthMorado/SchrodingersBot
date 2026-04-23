@@ -29,8 +29,8 @@ namespace SchrodingersBot
         public DbSet<ChatParameterEntity> ChatParameters { get; set; }
         public DbSet<EncxAuthEntity> LoginInfos { get; set; }
         public DbSet<EncxGameSubscriptionEntity> GameSubscriptions {get;set;}
-        public DbSet<EncxLevelEntity> Levels { get; set; }
-        public DbSet<EncxObjectEntity> Objects { get; set; }
+        //public DbSet<EncxLevelEntity> Levels { get; set; }
+        //public DbSet<EncxObjectEntity> Objects { get; set; }
 
     }
 }

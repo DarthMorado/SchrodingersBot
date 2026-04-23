@@ -64,8 +64,8 @@ namespace SchrodingersBot.Services.Encx
             }
             additionalObjects.AddRange(newAdditionalObjects.Skip(1));
 
-            sb.AppendLine(FormatLevelHelps(game));
-            sb.AppendLine(FormatLevelBonuses(game));
+            sb.AppendLine(await FormatLevelHelps(game, additionalObjects));
+            sb.AppendLine(await FormatLevelBonuses(game));
 
             result.Add(Answer.SimpleText(message, sb.ToString(), true));
 
@@ -122,35 +122,27 @@ namespace SchrodingersBot.Services.Encx
                     newLine += $": {lvl.Name}";
                 }
                 sb.AppendLine(newLine);
-                newLine = $"🔦: {lvl.Sectors?.Count ?? 0} ({lvl.RequiredSectorsCount}) | ";
+                newLine = $"🔦: <b>{lvl.SectorsLeftToClose}</b> ({lvl.RequiredSectorsCount}/{lvl.Sectors?.Count ?? 0}) | ";
                 if (lvl.Timeout == 0)
                 {
                     newLine += "⏳: -- |";
                 }
                 else
                 {
-                    newLine += "⏳: ";
-                    int hours = lvl.Timeout / 3600;
-                    if (hours > 0)
-                    {
-                        newLine += $"{hours}ч ";
-                    }
-                    int minutes = (lvl.Timeout / 60) % 60;
-                    if (minutes != 0)
-                    {
-                        newLine += $"{hours}м ";
-                    }
-                    var seconds = lvl.Timeout % 60;
-                    if (seconds != 0)
-                    {
-                        newLine += $"{seconds}c ";
-                    }
-                    newLine += "|";
+                    newLine += $"⏳: {ConvertTimeFromSeconds(lvl.Timeout)} |";
                 }
 
                 if (lvl.Helps != null && lvl.Helps.Any())
                 {
-                    newLine += $"💡: {lvl.Helps.Count} |";
+                    newLine += $"💡: {lvl.Helps.Count} ";
+
+                    var remainingTimes = lvl.Helps.Where(x => x.RemainSeconds > 0).Select(x => x.RemainSeconds);
+                    if (remainingTimes.Any())
+                    {
+                        newLine += $"({ConvertTimeFromSeconds(remainingTimes.Min())}) ";
+                    }
+
+                    newLine += "|";
                 }
 
                 if (lvl.Bonuses != null && lvl.Bonuses.Any())
@@ -213,7 +205,7 @@ namespace SchrodingersBot.Services.Encx
                 return result;
             }
         }
-        private string FormatLevelHelps(EncxGameEngineModel game)
+        private async Task<string> FormatLevelHelps(EncxGameEngineModel game, List<MessageObjectDTO> additionalObjects)
         {
             try
             {
@@ -224,10 +216,16 @@ namespace SchrodingersBot.Services.Encx
 
                 foreach (var help in lvl.Helps.Where(x => !x.IsPenalty).OrderBy(x => x.Number))
                 {
-                    sb.AppendLine($"💡 <b>Подсказка {help.Number}</b>:");
+                    sb.Append($"💡 <b>Подсказка {help.Number}</b>:");
                     if (!String.IsNullOrWhiteSpace(help.HelpText))
                     {
-                        sb.AppendLine($"{EscapeHtml(help.HelpText, out _)}");
+                        sb.AppendLine();
+                        var objects = await _htmlProcessingService.PrepareHtmlForTgAsync(help.HelpText);
+                        if (objects.Any())
+                        {
+                            sb.AppendLine(objects[0].Text);
+                            additionalObjects.AddRange(objects.Skip(1)); //todo
+                        }
                     }
                     else if (help.RemainSeconds != 0)
                     {
@@ -248,7 +246,7 @@ namespace SchrodingersBot.Services.Encx
             }
         }
 
-        private string FormatLevelBonuses(EncxGameEngineModel game)
+        private async Task<string> FormatLevelBonuses(EncxGameEngineModel game)
         {
             try
             {
@@ -273,11 +271,21 @@ namespace SchrodingersBot.Services.Encx
                     sb.AppendLine($"🎁{bonus.Number}: <b>{bonus.Name}</b>{(awardTime is null ? string.Empty : $" ({awardTime})")}:");
                     if (!String.IsNullOrWhiteSpace(bonus.Task))
                     {
-                        sb.AppendLine($"<i>{EscapeHtml(bonus.Task, out _)}</i>");
+                        var objects = await _htmlProcessingService.PrepareHtmlForTgAsync(bonus.Task);
+                        if (objects.Any())
+                        {
+                            sb.AppendLine($"<i>{objects[0].Text}</i>");
+                            //additionalObjects.AddRange(objects.Skip(1)); //todo
+                        }
                     }
                     if (!String.IsNullOrWhiteSpace(bonus.Help))
                     {
-                        sb.AppendLine($"{EscapeHtml(bonus.Help, out _)}");
+                        var objects = await _htmlProcessingService.PrepareHtmlForTgAsync(bonus.Help);
+                        if (objects.Any())
+                        {
+                            sb.AppendLine($"{objects[0].Text}");
+                            //additionalObjects.AddRange(objects.Skip(1)); //todo
+                        }
                     }
 
                 }
@@ -300,10 +308,10 @@ namespace SchrodingersBot.Services.Encx
             {
                 sb.Append($"{hours}ч ");
             }
-            int minutes = (time / 60) % 60;
+            int minutes = ((time / 60) % 60);
             if (minutes != 0)
             {
-                sb.Append($"{hours}м ");
+                sb.Append($"{minutes}м ");
             }
             var seconds = time % 60;
             if (seconds != 0)
@@ -313,16 +321,16 @@ namespace SchrodingersBot.Services.Encx
             return sb.ToString();
         }
 
-        private string EscapeHtml(string input, out List<object> additionalObjects)
-        {
-            string result = input
-                .Replace("&", "&amp;")
-                .Replace("<", "&lt;")
-                .Replace(">", "&gt;")
-                .Replace("\"", "&quot;");
+        //private string EscapeHtml(string input, out List<object> additionalObjects)
+        //{
+        //    string result = input
+        //        .Replace("&", "&amp;")
+        //        .Replace("<", "&lt;")
+        //        .Replace(">", "&gt;")
+        //        .Replace("\"", "&quot;");
 
-            additionalObjects = new();
-            return result;
-        }
+        //    additionalObjects = new();
+        //    return result;
+        //}
     }
 }
