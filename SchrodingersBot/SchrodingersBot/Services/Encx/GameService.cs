@@ -229,7 +229,7 @@ namespace SchrodingersBot.Services.Encx
                     }
                     else if (help.RemainSeconds != 0)
                     {
-                        sb.AppendLine($"<i>будет доступна через {ConvertTimeFromSeconds(help.RemainSeconds)}</i>");
+                        sb.AppendLine($" <i>будет доступна через {ConvertTimeFromSeconds(help.RemainSeconds)}</i>");
                     }
                 }
 
